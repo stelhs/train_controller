@@ -2,6 +2,7 @@
 #define LED_LIB_H
 
 #include "types.h"
+#include "sys_timer.h"
 
 struct led
 {
@@ -15,13 +16,11 @@ struct led
 	struct sys_timer timer;
 };
 
-void leds_init(struct led *leds);
+void led_register(struct led *led);
 
 void led_on(struct led *led);
 void led_off(struct led *led);
 void led_set_blink(struct led *led, t_counter interval1,
 			t_counter interval2, int count);
-
-void leds_update(void);
 
 #endif

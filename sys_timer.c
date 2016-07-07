@@ -5,13 +5,19 @@
  *      Author: Michail Kurochkin
  */
 
+#include <avr/interrupt.h>
+#include "types.h"
+#include "list.h"
 #include "sys_timer.h"
+
+/* configure timer2 to frequency 1000Hz */
+#define TIMER2_DELAY (u8)((u32)F_CPU / 1000 / (2 * 32) - 1)
 
 static struct list list_subscribers = LIST_INIT;
 
 u32 jiffies = 0;
 
-SIGNAL(SIG_OUTPUT_COMPARE2)
+ISR(TIMER2_COMP_vect)
 {
 	struct le *le;
 	jiffies++;

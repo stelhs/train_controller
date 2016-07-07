@@ -8,9 +8,13 @@
 #include <stdio.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
-#include "gpio.h"
-#include "config.h"
 #include "board.h"
+#include "leds.h"
+#include "types.h"
+#include "gpio.h"
+#include "gpio_debouncer.h"
+#include "gpio_keys.h"
+#include "config.h"
 #include "uart.h"
 
 
@@ -144,28 +148,28 @@ struct led led_traction = {
 
 struct gpio_input input_gerkon = {
 	.gpio = gpio_list + 3,
-	.on_change = gerkon_changed
+	//.on_change = gerkon_changed
 };
 
 struct gpio_key traction_up = {
 	.input = {
 		.gpio = gpio_list + 0
 	},
-	.on_click = traction_up_handler
+	//.on_click = traction_up_handler
 };
 
 struct gpio_key traction_down = {
 	.input = {
 		.gpio = gpio_list + 2
 	},
-	.on_click = traction_down_handler
+	//.on_click = traction_down_handler
 };
 
 struct gpio_key traction_reset = {
 	.input = {
 		.gpio = gpio_list + 1
 	},
-	.on_click = traction_reset_handler
+	//.on_click = traction_reset_handler
 };
 
 struct uart console = {
@@ -195,6 +199,7 @@ static void board_init(void)
 
 	usart_init(&console);
 	wdt_enable(WDTO_2S);
+	sys_timer_init();
 	sei();
 }
 

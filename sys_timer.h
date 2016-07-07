@@ -7,6 +7,8 @@
 #ifndef SYS_TIMER_H_
 #define SYS_TIMER_H_
 
+#include "list.h"
+
 struct sys_timer {
 	int devisor;
 	void *priv;
@@ -14,5 +16,8 @@ struct sys_timer {
 // Private:
 	struct le le;
 };
+
+void sys_timer_add_handler(struct sys_timer *timer);
+void sys_timer_init(void);
 
 #endif /* SYS_TIMER_H_ */

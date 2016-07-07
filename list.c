@@ -138,9 +138,9 @@ struct le *list_tail(const struct list *list)
  *
  * @return Number of list elements
  */
-uint32_t list_count(const struct list *list)
+u16 list_count(const struct list *list)
 {
-	uint32_t n = 0;
+	u16 n = 0;
 	struct le *le;
 
 	if (!list)

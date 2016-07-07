@@ -1,6 +1,9 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <stdio.h>
+#include "types.h"
+
 /** Linked-list element */
 struct le {
 	struct le *prev;    /**< Previous element                    */
@@ -30,7 +33,7 @@ void list_append(struct list *list, struct le *le, void *data);
 void list_unlink(struct le *le);
 struct le *list_head(const struct list *list);
 struct le *list_tail(const struct list *list);
-uint32_t list_count(const struct list *list);
+u16 list_count(const struct list *list);
 
 
 /**

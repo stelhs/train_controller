@@ -2,6 +2,8 @@
 #define GPIO_KEYS_H
 
 #include "types.h"
+#include "gpio.h"
+#include "gpio_debouncer.h"
 
 #define GPIO_KEY_CLICK_INTERVAL 500
 #define GPIO_KEY_HOLD_INTERVAL 1000
@@ -28,5 +30,6 @@ struct gpio_key
 	t_counter hold_counter;
 };
 
+void gpio_keys_register_key(struct gpio_key *key);
 
 #endif // GPIO_KEYS_H

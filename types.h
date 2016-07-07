@@ -22,6 +22,8 @@ typedef u32 t_counter;
 #define ON 1
 #define OFF 0
 
+#define true 1
+#define false 0
 
 // Создать строку в программной памяти
 #define SET_PGM_STR(num, str)    \

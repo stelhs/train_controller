@@ -7,6 +7,8 @@
 #ifndef IDLE_H_
 #define IDLE_H_
 
+#include "list.h"
+
 struct sys_work {
 	void *priv;
 	void (*handler)(void *);
@@ -14,5 +16,7 @@ struct sys_work {
 	struct le le;
 };
 
+void idle(void);
+void sys_idle_add_handler(struct sys_work *wrk);
 
 #endif /* IDLE_H_ */

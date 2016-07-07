@@ -1,4 +1,5 @@
 #include "types.h"
+#include "gpio.h"
 #include "leds.h"
 
 static void led_timer_handler(void *arg)
@@ -8,7 +9,7 @@ static void led_timer_handler(void *arg)
 		led->blink_timer--;
 
 	if(led->blink_timer > 1 || led->interval1 == 0)
-		continue;
+		return;
 
 	if (led->blink_counter == 1) {
 		gpio_set_state(led->gpio, OFF);

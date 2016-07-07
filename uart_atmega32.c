@@ -5,15 +5,11 @@
  *      Author: Michail Kurochkin
  */
 
+#include <avr/wdt.h>
+#include <stdio.h>
+#include "types.h"
 #include "uart.h"
 
-#include <stdio.h>
-#include <avr/io.h>
-
-/**
- * Вывод в RS232 порт 0
- * @param var - символ для отправки
- */
 int usart_send_byte(struct uart *uart, u8 byte)
 {
 	while (!(UCSRA & (1 << UDRE)));
@@ -21,34 +17,20 @@ int usart_send_byte(struct uart *uart, u8 byte)
 	return 0;
 }
 
-/**
- * Чтение из RS232 порт 0
- * @return Ожидает и возвращает прочитанный символ
- */
-static char
-usart_get_blocked(struct uart *uart)
-{
-	while (!(UCSRA & (1 << RXC)));
-	return UDR;
-}
-
-/**
- * Чтение из RS232 порт 0
- * @return возвращает символ из внутреннего буфера
- */
-char
-usart_get_byte(struct uart *uart)
+u8 usart_get_byte(struct uart *uart)
 {
 	if ((UCSRA & (1 << RXC)))
 		return UDR;
 	return 0;
 }
 
+u8 usart_get_blocked(struct uart *uart)
+{
+	while (!(UCSRA & (1 << RXC)));
+	return UDR;
+}
 
-/**
- * Инициалтизация RS232 порта 0
- * @param ubrr - скорость BAUD RATE
- */
+
 int usart_init(struct uart *uart)
 {
 	if (uart->chip_id != 0)
@@ -64,5 +46,6 @@ int usart_init(struct uart *uart)
 
 	if (uart->fdev_type)
 		fdevopen((void *) usart_send_byte, (void *) usart_get_blocked);
+	return 0;
 }
 
