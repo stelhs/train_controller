@@ -5,13 +5,14 @@
 
 struct led
 {
-	struct le le;
 	struct gpio *gpio;
+// Private:
 	u8 state : 1; // current state
 	t_counter blink_timer; // timer counter
 	t_counter interval1; // active interval
 	t_counter interval2; // inactive interval
 	int blink_counter; //
+	struct sys_timer timer;
 };
 
 void leds_init(struct led *leds);

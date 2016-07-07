@@ -1,16 +1,21 @@
 #ifndef GPIO_DEBOUNCER_H
 #define GPIO_DEBOUNCER_H
 
+#define GPIO_DEBOUNCE_INTERVAL 100
+
 struct gpio_input
 {
-	struct le le;
 	struct gpio *gpio;
 	void (*on_change)(struct gpio_input *);
 	u8 stable_state :1;
+
+// Private:
+	struct le le;
 	u8 changed :1;
 	u8 prev_state :1;
-	t_counter debounce_interval;
 	t_counter debounce_counter;
+	struct sys_timer timer;
+	struct sys_work wrk;
 };
 
 

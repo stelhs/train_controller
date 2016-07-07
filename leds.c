@@ -1,7 +1,33 @@
 #include "types.h"
 #include "leds.h"
 
-static struct list *list_leds = LIST_INIT;
+static void led_timer_handler(void *arg)
+{
+	struct led *led = (struct led *)arg;
+	if(led->blink_timer > 1)
+		led->blink_timer--;
+
+	if(led->blink_timer > 1 || led->interval1 == 0)
+		continue;
+
+	if (led->blink_counter == 1) {
+		gpio_set_state(led->gpio, OFF);
+		led->blink_timer = 0;
+		led->state = 0;
+		return;
+	}
+
+	if(led->state) {
+		gpio_set_state(led->gpio, OFF);
+		led->blink_timer = led->interval2 + 1;
+	} else  {
+		gpio_set_state(led->gpio, ON);
+		led->blink_timer = led->interval1 + 1;
+		if (led->blink_counter > 1)
+			led->blink_counter--;
+	}
+}
+
 
 /**
  * Register new led
@@ -13,7 +39,11 @@ void led_register(struct led *led)
 	led->blink_timer = 0;
 	led->interval1 = 0;
 	led->interval2 = 0;
-	list_append(&list_leds, &led->le, led);
+
+	led->timer.devisor = 10;
+	led->timer.priv = led;
+	led->timer.handler = led_timer_handler;
+	sys_timer_add_handler(&led->timer);
 }
 
 /**
@@ -59,36 +89,3 @@ void led_set_blink(struct led *led, t_counter interval1,
 }
 
 
-/**
- * Update led timers. Function must be integrate into timer ISR callback.
- */
-void leds_update(void)
-{
-	struct le *le;
-
-	LIST_FOREACH(&list_leds, le) {
-		struct led *led = list_ledata(le);
-		if(led->blink_timer > 1)
-			led->blink_timer--;
-
-		if(led->blink_timer > 1 || led->interval1 == 0)
-			continue;
-
-		if (led->blink_counter == 1) {
-			gpio_set_state(led->gpio, OFF);
-			led->blink_timer = 0;
-			led->state = 0;
-			return;
-		}
-
-		if(led->state) {
-			gpio_set_state(led->gpio, OFF);
-			led->blink_timer = led->interval2 + 1;
-		} else  {
-			gpio_set_state(led->gpio, ON);
-			led->blink_timer = led->interval1 + 1;
-			if (led->blink_counter > 1)
-				led->blink_counter--;
-		}
-	}
-}
