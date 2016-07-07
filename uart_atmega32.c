@@ -53,6 +53,7 @@ int usart_init(struct uart *uart)
 {
 	if (uart->chip_id != 0)
 		return -EINVAL;
+
 	u16 ubrr = F_CPU / 16 / uart->baud_rate - 1;
 
 	UBRRH = (u8) (ubrr >> 8);

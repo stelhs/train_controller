@@ -33,6 +33,6 @@ typedef u32 t_counter;
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-#define EINVAL 1
+#define EINVAL 22
 
 #endif /* TYPES_H_ */
