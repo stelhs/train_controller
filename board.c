@@ -179,7 +179,7 @@ struct uart console = {
 /**
  * Init board hardware
  */
-void board_init(void)
+static void board_init(void)
 {
 	gpio_register_list(gpio_list);
 	led_register(&led_ready);
@@ -194,7 +194,15 @@ void board_init(void)
 	gpio_keys_register_key(&traction_reset);
 
 	usart_init(&console);
-	wdt_enable(WDTO_2S); // Включаем вэтчдог
+	wdt_enable(WDTO_2S);
 	sei();
+}
+
+
+int main(void)
+{
+	board_init();
+	for(;;)
+		idle();
 }
 
