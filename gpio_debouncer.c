@@ -10,7 +10,7 @@ static void gpio_debouncer_timer_handler(void *arg)
 	curr_state = gpio_get_state(input->gpio);
 	if (input->prev_state != curr_state) {
 		input->debounce_counter = GPIO_DEBOUNCE_INTERVAL;
-		curr_state = input->prev_state;
+		input->prev_state = curr_state;
 	}
 
 	if (input->debounce_counter > 1)
