@@ -30,25 +30,21 @@ static void gpio_keys_timer_handler(void *arg)
 				key->click_timer = 0;
 			}
 		}
-
-		if (key->click_timer == 1) {
-			key->click_action = 1;
-			key->click_timer = 0;
-		}
-
-		if (key->hold_timer == 1) {
-			key->hold_action = 1;
-			key->hold_timer = GPIO_KEY_HOLD_INTERVAL;
-			key->hold_counter++;
-		}
-
-		/* decrement timers */
-		if (key->click_timer > 1)
-			key->click_timer--;
-
-		if (key->hold_timer > 1)
-			key->hold_timer--;
 	}
+
+	if (key->hold_timer == 1) {
+		key->hold_action = 1;
+		key->hold_timer = GPIO_KEY_HOLD_INTERVAL;
+		key->hold_counter++;
+	}
+
+	/* decrement timers */
+	if (key->click_timer > 1)
+		key->click_timer--;
+
+	if (key->hold_timer > 1)
+		key->hold_timer--;
+
 }
 
 
@@ -72,7 +68,7 @@ static void gpio_keys_tsk(void *arg)
 		key->click_action = 0;
 	}
 
-	if (key->on_hold && key->click_action) {
+	if (key->on_hold && key->hold_action) {
 		key->on_hold(key, key->hold_counter);
 		key->hold_action = 0;
 	}

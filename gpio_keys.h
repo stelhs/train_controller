@@ -5,16 +5,17 @@
 #include "gpio.h"
 #include "gpio_debouncer.h"
 
-#define GPIO_KEY_CLICK_INTERVAL 500
-#define GPIO_KEY_HOLD_INTERVAL 1000
+#define GPIO_KEY_CLICK_INTERVAL 50
+#define GPIO_KEY_HOLD_INTERVAL 100
 
 struct gpio_key
 {
 	struct gpio_input input;
-	void (*on_press_down)(struct gpio_key *);
-	void (*on_press_up)(struct gpio_key *);
-	void (*on_click)(struct gpio_key *);
-	void (*on_hold)(struct gpio_key *, t_counter hold_counter);
+	void (*on_press_down)(void *);
+	void (*on_press_up)(void *);
+	void (*on_click)(void *);
+	void (*on_hold)(void *, t_counter hold_counter);
+	void *priv;
 
 // Private:
 	struct sys_timer timer;
