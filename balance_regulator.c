@@ -10,20 +10,22 @@
 #include "balance_regulator.h"
 #include "sys_timer.h"
 
-static volatile s16 adc_value = 512;
+static volatile s32 adc_value = 512;
 
 ISR(ADC_vect)
 {
-	adc_value = (ADCH << 8) | ADCL;
+	adc_value = ADCL | (ADCH << 8);
 }
 
 static void timer_handler(void *arg)
 {
 	struct balance_regulator *balance = (struct balance_regulator *)arg;
 
-	balance->value = (adc_value - 512) * 50 / 512;
-	if (balance->value != balance->prev_value && balance->on_change)
+	balance->value = (adc_value - 512) * 100 / 512;
+	if (balance->value != balance->prev_value && balance->on_change) {
 		balance->on_change(balance->value);
+		balance->prev_value = balance->value;
+	}
 
 	/* start ADC balance regulator value*/
 	ADCSRA |= _BV(ADSC);
@@ -33,14 +35,13 @@ static void timer_handler(void *arg)
 void balance_regulator_init(struct balance_regulator *balance)
 {
 	/* configure ADC */
-	ADCSRA = _BV(ADEN) | _BV(ADIE) | _BV(ADPS2) | _BV(ADPS2)
-				| _BV(ADPS1) | _BV(ADPS0);
-	ADMUX = _BV(REFS1) | _BV(REFS0) | _BV(MUX1);
+	ADCSRA = _BV(ADEN) | _BV(ADIE) | _BV(ADPS0);
+	ADMUX = _BV(REFS1) | _BV(REFS0);
 	SREG |= _BV(SREG_I);
 
 	balance->prev_value = balance->value = 0;
 
-	balance->timer.devisor = 10;
+	balance->timer.devisor = 50;
 	balance->timer.handler = timer_handler;
 	balance->timer.priv = balance;
 	sys_timer_add_handler(&balance->timer);

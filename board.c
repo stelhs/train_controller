@@ -137,7 +137,7 @@ struct gpio gpio_list[] = {
 		.direction_addr = (u8 *) &DDRA,
 		.port_addr = (u8 *) &PORTA,
 		.pin_addr = (u8 *) &PINA,
-		.pin = 2,
+		.pin = 0,
 		.direction = GPIO_INPUT,
 		.pull_up = 0
 	},

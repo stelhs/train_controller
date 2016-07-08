@@ -11,7 +11,7 @@
 #include "sys_timer.h"
 
 struct balance_regulator {
-	s16 value; /* from -50% to 50% */
+	s16 value; /* from -100% to 100% */
 	s16 prev_value;
 	struct sys_timer timer;
 	void (*on_change)(s16 value);
