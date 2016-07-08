@@ -5,6 +5,7 @@
 static void led_timer_handler(void *arg)
 {
 	struct led *led = (struct led *)arg;
+
 	if(led->blink_timer > 1)
 		led->blink_timer--;
 
@@ -21,11 +22,13 @@ static void led_timer_handler(void *arg)
 	if(led->state) {
 		gpio_set_state(led->gpio, OFF);
 		led->blink_timer = led->interval2 + 1;
+		led->state = 0;
 	} else  {
 		gpio_set_state(led->gpio, ON);
 		led->blink_timer = led->interval1 + 1;
 		if (led->blink_counter > 1)
 			led->blink_counter--;
+		led->state = 1;
 	}
 }
 
