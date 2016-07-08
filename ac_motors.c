@@ -136,4 +136,5 @@ void ac_motors_subsystem_init(void)
 	/* configure timer0 to highest frequency */
 	TCCR0 =  _BV(WGM01) | _BV(WGM00) | _BV(COM01) | _BV(CS00);
 	OCR0 = 0;
+	TIMSK = 1 << TOIE0;	\
 }
