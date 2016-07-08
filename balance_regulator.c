@@ -41,7 +41,7 @@ void balance_regulator_init(struct balance_regulator *balance)
 
 	balance->prev_value = balance->value = 0;
 
-	balance->timer.devisor = 50;
+	balance->timer.devisor = 100;
 	balance->timer.handler = timer_handler;
 	balance->timer.priv = balance;
 	sys_timer_add_handler(&balance->timer);
