@@ -10,8 +10,6 @@
 #include "list.h"
 #include "sys_timer.h"
 
-/* configure timer2 to frequency 1000Hz */
-#define TIMER2_DELAY (u8)((u32)F_CPU / 1000 / (2 * 32) - 1)
 
 static struct list list_subscribers = LIST_INIT;
 
@@ -32,9 +30,13 @@ ISR(TIMER2_COMP_vect)
 
 void sys_timer_add_handler(struct sys_timer *timer)
 {
+	cli();
 	list_append(&list_subscribers, &timer->le, timer);
+	sei();
 }
 
+/* configure timer2 to frequency 1000Hz */
+#define TIMER2_DELAY (u8)((u32)F_CPU / 1000 / (2 * 32) - 1)
 void sys_timer_init(void)
 {
 	OCR2 = TIMER2_DELAY;
