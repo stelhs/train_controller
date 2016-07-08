@@ -9,6 +9,8 @@
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include "board.h"
+
+#include "ac_motors.h"
 #include "leds.h"
 #include "types.h"
 #include "gpio.h"
@@ -184,6 +186,17 @@ struct uart console = {
 	.fdev_type = 1
 };
 
+struct ac_motor motor_left = {
+	.semistor = gpio_list + 13,
+	.power_forward = gpio_list + 11,
+	.power_backward = gpio_list + 12,
+};
+
+struct ac_motor motor_right = {
+	.semistor = gpio_list + 14,
+	.power_forward = gpio_list + 11,
+	.power_backward = gpio_list + 12,
+};
 
 
 /**
@@ -202,6 +215,10 @@ static void board_init(void)
 	gpio_keys_register_key(&traction_up);
 	gpio_keys_register_key(&traction_down);
 	gpio_keys_register_key(&traction_reset);
+
+	ac_motors_subsystem_init();
+	ac_motor_register(&motor_left);
+	ac_motor_register(&motor_right);
 
 	usart_init(&console);
 //	wdt_enable(WDTO_2S);
