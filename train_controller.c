@@ -34,3 +34,8 @@ void traction_reverse_handler(void *arg, t_counter hold_counter)
 {
 	printf("traction_reverse\r\n");
 }
+
+void power_balance_regulator_changed(s16 value)
+{
+	printf("balance = %d\r\n", value);
+}

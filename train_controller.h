@@ -14,5 +14,6 @@ void traction_up_handler(void *arg);
 void traction_down_handler(void *arg);
 void traction_reset_handler(void *arg);
 void traction_reverse_handler(void *arg, t_counter hold_counter);
+void power_balance_regulator_changed(s16 value);
 
 #endif /* TRAIN_CONTROLLER_H_ */

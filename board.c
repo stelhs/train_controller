@@ -18,6 +18,8 @@
 #include "gpio_keys.h"
 #include "config.h"
 #include "uart.h"
+#include "ac_motors.h"
+#include "balance_regulator.h"
 #include "train_controller.h"
 
 
@@ -131,6 +133,14 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
+	{ // balance regulator
+		.direction_addr = (u8 *) &DDRA,
+		.port_addr = (u8 *) &PORTA,
+		.pin_addr = (u8 *) &PINA,
+		.pin = 2,
+		.direction = GPIO_INPUT,
+		.pull_up = 0
+	},
 	{
 		.direction_addr = NULL,
 		.port_addr = NULL,
@@ -186,6 +196,10 @@ struct uart console = {
 	.fdev_type = 1
 };
 
+struct balance_regulator power_balance_regulator = {
+	.on_change = power_balance_regulator_changed
+};
+
 struct ac_motor motor_left = {
 	.semistor = gpio_list + 13,
 	.power_forward = gpio_list + 11,
@@ -215,6 +229,8 @@ static void board_init(void)
 	gpio_keys_register_key(&traction_up);
 	gpio_keys_register_key(&traction_down);
 	gpio_keys_register_key(&traction_reset);
+
+	balance_regulator_init(&power_balance_regulator);
 
 	ac_motors_subsystem_init();
 	ac_motor_register(&motor_left);
