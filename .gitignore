@@ -2,5 +2,5 @@
 .project
 .settings/
 *.o
-firmware
+firmware.hex
 
