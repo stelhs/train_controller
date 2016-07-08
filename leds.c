@@ -13,18 +13,18 @@ static void led_timer_handler(void *arg)
 		return;
 
 	if (led->blink_counter == 1) {
-		gpio_set_state(led->gpio, OFF);
+		gpio_set_value(led->gpio, OFF);
 		led->blink_timer = 0;
 		led->state = 0;
 		return;
 	}
 
 	if(led->state) {
-		gpio_set_state(led->gpio, OFF);
+		gpio_set_value(led->gpio, OFF);
 		led->blink_timer = led->interval2 + 1;
 		led->state = 0;
 	} else  {
-		gpio_set_state(led->gpio, ON);
+		gpio_set_value(led->gpio, ON);
 		led->blink_timer = led->interval1 + 1;
 		if (led->blink_counter > 1)
 			led->blink_counter--;
@@ -39,7 +39,7 @@ static void led_timer_handler(void *arg)
  */
 void led_register(struct led *led)
 {
-	gpio_set_state(led->gpio, OFF);
+	gpio_set_value(led->gpio, OFF);
 	led->blink_timer = 0;
 	led->interval1 = 0;
 	led->interval2 = 0;
@@ -55,7 +55,7 @@ void led_register(struct led *led)
  */
 void led_on(struct led *led)
 {
-	gpio_set_state(led->gpio, ON);
+	gpio_set_value(led->gpio, ON);
 	led->interval1 = 0;
 	led->interval2 = 0;
 	led->blink_timer = 0;
@@ -66,7 +66,7 @@ void led_on(struct led *led)
  */
 void led_off(struct led *led)
 {
-	gpio_set_state(led->gpio, OFF);
+	gpio_set_value(led->gpio, OFF);
 	led->interval1 = 0;
 	led->interval2 = 0;
 	led->blink_timer = 0;
@@ -85,7 +85,7 @@ void led_set_blink(struct led *led, t_counter interval1,
 	if(interval2 == 0)
 		interval2 = interval1;
 
-	gpio_set_state(led->gpio, ON);
+	gpio_set_value(led->gpio, ON);
 	led->interval1 = interval1;
 	led->interval2 = interval2;
 	led->blink_timer = interval1 + 1;

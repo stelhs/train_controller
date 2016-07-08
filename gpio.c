@@ -21,7 +21,7 @@ void gpio_set_direction(struct gpio *gpio, enum gpio_direction dir)
  * @param gpio - GPIO pin desriptor
  * @param mode - ON or OFF
  */
-void gpio_set_state(struct gpio *gpio, u8 mode)
+void gpio_set_value(struct gpio *gpio, u8 mode)
 {
 	if (mode)
 		gpio->port_addr[0] |= (1 << gpio->pin);
@@ -41,6 +41,6 @@ void gpio_register_list(struct gpio *gpio_list)
 	struct gpio *gpio;
 	for (gpio = gpio_list; gpio->direction_addr != NULL; gpio++) {
 		gpio_set_direction(gpio, gpio->direction);
-		gpio_set_state(gpio, gpio->output_state);
+		gpio_set_value(gpio, gpio->output_state);
 	}
 }

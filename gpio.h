@@ -22,7 +22,7 @@ struct gpio {
 
 void gpio_register_list(struct gpio *gpio_list);
 void gpio_set_direction(struct gpio *gpio, enum gpio_direction dir);
-void gpio_set_state(struct gpio *gpio, u8 mode);
+void gpio_set_value(struct gpio *gpio, u8 mode);
 
 /**
  * Get GPIO pin input state
