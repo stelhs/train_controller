@@ -30,6 +30,19 @@ u8 usart_get_blocked(struct uart *uart)
 	return UDR;
 }
 
+static int serial_out(char byte)
+{
+	while(!(UCSRA & (1 << UDRE)));
+	UDR = byte;
+	return 0;
+}
+
+static char serial_in(void)
+{
+	while(!(UCSRA & (1 << RXC)));
+	return UDR;
+}
+
 
 int usart_init(struct uart *uart)
 {
@@ -45,7 +58,7 @@ int usart_init(struct uart *uart)
 	UCSRC = (1 << URSEL) | (3 << UCSZ0);
 
 	if (uart->fdev_type)
-		fdevopen((void *) usart_send_byte, (void *) usart_get_blocked);
+		fdevopen((void *) serial_out, (void *) serial_in);
 	return 0;
 }
 
