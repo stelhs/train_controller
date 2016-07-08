@@ -16,12 +16,14 @@
 #include "gpio_keys.h"
 #include "config.h"
 #include "uart.h"
+#include "train_controller.h"
 
 
 struct gpio gpio_list[] = {
 	{ // traction +1
 		.direction_addr = (u8 *) &DDRA,
 		.port_addr = (u8 *) &PORTA,
+		.pin_addr = (u8 *) &PINA,
 		.pin = 3,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
@@ -29,6 +31,7 @@ struct gpio gpio_list[] = {
 	{ // 0 (reset/reverse)
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
+		.pin_addr = (u8 *) &PINC,
 		.pin = 4,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
@@ -36,6 +39,7 @@ struct gpio gpio_list[] = {
 	{ // traction -1
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
+		.pin_addr = (u8 *) &PINC,
 		.pin = 5,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
@@ -43,28 +47,29 @@ struct gpio gpio_list[] = {
 	{ // gerkon
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
+		.pin_addr = (u8 *) &PINC,
 		.pin = 6,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
 	{ // tahogenerator
 		.direction_addr = (u8 *) &DDRD,
-		.port_addr = (u8 *) &PORTD,
+		.port_addr = (u8 *) &PIND,
 		.pin = 3,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
 	{ // input 100Hz
-		.direction_addr = (u8 *) &DDRA,
-		.port_addr = (u8 *) &PORTA,
-		.pin = 4,
-		.direction = GPIO_OUTPUT,
+		.direction_addr = (u8 *) &DDRD,
+		.port_addr = (u8 *) &PIND,
+		.pin = 2,
+		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
 	{ // led ready
-		.direction_addr = (u8 *) &DDRD,
-		.port_addr = (u8 *) &PORTD,
-		.pin = 2,
+		.direction_addr = (u8 *) &DDRA,
+		.port_addr = (u8 *) &PORTA,
+		.pin = 4,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
@@ -148,28 +153,29 @@ struct led led_traction = {
 
 struct gpio_input input_gerkon = {
 	.gpio = gpio_list + 3,
-	//.on_change = gerkon_changed
+	.on_change = gerkon_state_changed
 };
 
 struct gpio_key traction_up = {
 	.input = {
 		.gpio = gpio_list + 0
 	},
-	//.on_click = traction_up_handler
+	.on_click = traction_up_handler
 };
 
 struct gpio_key traction_down = {
 	.input = {
 		.gpio = gpio_list + 2
 	},
-	//.on_click = traction_down_handler
+	.on_click = traction_down_handler
 };
 
 struct gpio_key traction_reset = {
 	.input = {
 		.gpio = gpio_list + 1
 	},
-	//.on_click = traction_reset_handler
+	.on_click = traction_reset_handler,
+	.on_hold = traction_reverse_handler
 };
 
 struct uart console = {
@@ -198,7 +204,7 @@ static void board_init(void)
 	gpio_keys_register_key(&traction_reset);
 
 	usart_init(&console);
-	wdt_enable(WDTO_2S);
+//	wdt_enable(WDTO_2S);
 	sys_timer_init();
 	sei();
 }
@@ -207,6 +213,7 @@ static void board_init(void)
 int main(void)
 {
 	board_init();
+	printf("Init - ok\r\n");
 	for(;;)
 		idle();
 }
