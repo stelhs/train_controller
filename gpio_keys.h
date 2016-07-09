@@ -5,9 +5,6 @@
 #include "gpio.h"
 #include "gpio_debouncer.h"
 
-#define GPIO_KEY_CLICK_INTERVAL 50
-#define GPIO_KEY_HOLD_INTERVAL 100
-
 struct gpio_key
 {
 	struct gpio_input input;

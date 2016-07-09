@@ -1,6 +1,8 @@
 #include "gpio_keys.h"
 
 
+#define GPIO_KEY_CLICK_INTERVAL 50
+#define GPIO_KEY_HOLD_INTERVAL 100
 
 
 static void gpio_keys_timer_handler(void *arg)
