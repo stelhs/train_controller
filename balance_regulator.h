@@ -8,12 +8,12 @@
 #define BALANCE_REGULATOR_H_
 
 #include "types.h"
-#include "sys_timer.h"
+#include "idle.h"
 
 struct balance_regulator {
 	s16 value; /* from -100% to 100% */
 	s16 prev_value;
-	struct sys_timer timer;
+	struct sys_work wrk;
 	void (*on_change)(s16 value);
 };
 
