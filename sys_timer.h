@@ -15,6 +15,7 @@ struct sys_timer {
 	void (*handler)(void *);
 // Private:
 	struct le le;
+	int counter;
 };
 
 void sys_timer_add_handler(struct sys_timer *timer);

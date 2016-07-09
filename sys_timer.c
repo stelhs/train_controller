@@ -23,8 +23,11 @@ ISR(TIMER2_COMP_vect)
 	LIST_FOREACH(&list_subscribers, le) {
 		struct sys_timer *timer = list_ledata(le);
 
-		if (!(jiffies % timer->devisor))
+		timer->counter++;
+		if (timer->counter == timer->devisor) {
 			timer->handler(timer->priv);
+			timer->counter = 0;
+		}
 	}
 }
 
