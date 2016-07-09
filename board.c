@@ -59,13 +59,15 @@ struct gpio gpio_list[] = {
 	{ // tahogenerator
 		.direction_addr = (u8 *) &DDRD,
 		.port_addr = (u8 *) &PIND,
+		.pin_addr = (u8 *) &PORTD,
 		.pin = 3,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
 	{ // input 100Hz
 		.direction_addr = (u8 *) &DDRD,
-		.port_addr = (u8 *) &PIND,
+		.port_addr = (u8 *) &PORTD,
+		.pin_addr = (u8 *) &PIND,
 		.pin = 2,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
@@ -124,14 +126,14 @@ struct gpio gpio_list[] = {
 		.port_addr = (u8 *) &PORTC,
 		.pin = 2,
 		.direction = GPIO_OUTPUT,
-		.output_state = 0
+		.output_state = 1
 	},
 	{ // right traction
 		.direction_addr = (u8 *) &DDRD,
 		.port_addr = (u8 *) &PORTD,
 		.pin = 4,
 		.direction = GPIO_OUTPUT,
-		.output_state = 0
+		.output_state = 1
 	},
 	{ // balance regulator
 		.direction_addr = (u8 *) &DDRA,

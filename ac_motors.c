@@ -11,20 +11,20 @@
 #include <avr/wdt.h>
 #include "list.h"
 #include "gpio.h"
+#include "board.h"
 
 static struct list list_motors = LIST_INIT;
 
 /* maximum interval between start waveform and enable semistor.
  * That means the minimum motor power */
-#define SEMISTOR_MAX_INTERVAL 240
+#define SEMISTOR_MAX_INTERVAL 220
 
 /* minimum interval between start waveform and enable semistor.
  * That means the maximum motor power.  */
-#define SEMISTOR_MIN_INTERVAL 32
+#define SEMISTOR_MIN_INTERVAL 20
 
 /* semistor active front interval in timer0 ticks */
-#define SEMISTOR_PULSE_INTERVAL 5
-
+#define SEMISTOR_PULSE_INTERVAL 10
 
 
 /* input AC signal 100Hz irq handler */
@@ -37,13 +37,13 @@ ISR(INT0_vect)
 		if (motor->full_power)
 			continue;
 
-		gpio_set_value(motor->semistor, OFF);
+		gpio_set_value(motor->semistor, 1);
 		motor->semistor_counter = motor->semistor_interval;
 	}
 }
 
 /* timer0 irq handler */
-ISR(TIMER0_COMP_vect)
+ISR(TIMER0_OVF_vect)
 {
 	struct le *le;
 	LIST_FOREACH(&list_motors, le) {
@@ -53,10 +53,10 @@ ISR(TIMER0_COMP_vect)
 			motor->semistor_counter--;
 
 		if (motor->semistor_counter == SEMISTOR_PULSE_INTERVAL)
-			gpio_set_value(motor->semistor, ON);
+			gpio_set_value(motor->semistor, 0);
 
 		if (motor->semistor_counter == 1) {
-			gpio_set_value(motor->semistor, OFF);
+			gpio_set_value(motor->semistor, 1);
 			motor->semistor_counter = 0;
 		}
 	}
@@ -71,7 +71,7 @@ void ac_motor_register(struct ac_motor *motor)
 {
 	cli();
 	ac_motor_disable(motor);
-	gpio_set_value(motor->semistor, OFF);
+	gpio_set_value(motor->semistor, 1);
 	motor->semistor_interval = 0;
 	motor->semistor_counter = 0;
 	motor->full_power = 0;
@@ -87,21 +87,25 @@ void ac_motor_register(struct ac_motor *motor)
  */
 void ac_motor_set_power(struct ac_motor *motor, u8 power)
 {
-	u16 range = (SEMISTOR_MAX_INTERVAL - SEMISTOR_MIN_INTERVAL);
+	u32 range = (SEMISTOR_MAX_INTERVAL - SEMISTOR_MIN_INTERVAL);
+	u16 semistor_interval;
 
 	if (power == 100) {
 		cli();
 		motor->semistor_interval = 0;
 		motor->semistor_counter = 0;
 		motor->full_power = 1;
-		gpio_set_value(motor->semistor, ON);
+		gpio_set_value(motor->semistor, 0);
 		sei();
 		return;
 	}
 
 	motor->full_power = 0;
 	power = 100 - power; /* invert power */
-	motor->semistor_interval = power * 100 / range + SEMISTOR_MIN_INTERVAL;
+	semistor_interval = ((u32)power) * range / 100 + SEMISTOR_MIN_INTERVAL;
+	cli();
+	motor->semistor_interval = semistor_interval;
+	sei();
 }
 
 
@@ -131,10 +135,10 @@ void ac_motors_subsystem_init(void)
 	/* configure external interrupts for Int0 */
 	MCUCR |= _BV(ISC01);
 	GICR |= _BV(INT0);
-	GIFR |= _BV(INT0);
 
 	/* configure timer0 to highest frequency */
 	TCCR0 =  _BV(WGM01) | _BV(WGM00) | _BV(COM01) | _BV(CS00);
+	TIFR |= _BV(TOV0);
 	OCR0 = 0;
-	TIMSK = 1 << TOIE0;	\
+	TIMSK |= _BV(TOIE0);
 }
