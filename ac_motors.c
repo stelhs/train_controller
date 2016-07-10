@@ -133,7 +133,7 @@ void ac_motor_disable(struct ac_motor *motor)
 void ac_motors_subsystem_init(void)
 {
 	/* configure external interrupts for Int0 */
-	MCUCR |= _BV(ISC01);
+	MCUCR |= _BV(ISC00);
 	GICR |= _BV(INT0);
 
 	/* configure timer0 to highest frequency */
