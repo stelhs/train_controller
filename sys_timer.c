@@ -13,12 +13,9 @@
 
 static struct list list_subscribers = LIST_INIT;
 
-u32 jiffies = 0;
-
 ISR(TIMER2_COMP_vect)
 {
 	struct le *le;
-	jiffies++;
 
 	LIST_FOREACH(&list_subscribers, le) {
 		struct sys_timer *timer = list_ledata(le);
@@ -34,6 +31,7 @@ ISR(TIMER2_COMP_vect)
 void sys_timer_add_handler(struct sys_timer *timer)
 {
 	cli();
+	timer->counter = 0;
 	list_append(&list_subscribers, &timer->le, timer);
 	sei();
 }
