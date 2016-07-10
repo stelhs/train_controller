@@ -23,7 +23,6 @@ void idle(void)
 		struct sys_work *wrk = list_ledata(le);
 		wrk->handler(wrk->priv);
 	}
-	CLEAR_WATCHDOG();
 }
 
 void sys_idle_add_handler(struct sys_work *wrk)
