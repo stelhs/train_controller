@@ -27,9 +27,9 @@
  */
 static u8 position_power_table[] = {
 	0,
-	10,
+	20,
 	30,
-	50,
+	55,
 	75,
 	100,
 };
@@ -88,6 +88,7 @@ void train_controller_work(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
 	u8 speed = speedometer_get_speed();
+	speedometer_indicator_set(speed);
 
 	CLEAR_WATCHDOG();
 
@@ -177,13 +178,16 @@ static void traction_dec_position_safe(struct train_controller *tc)
 
 	tc->moution_state--;
 	traction_set_power(tc, position_power_table[tc->moution_state]);
+	if (tc->moution_state == TRAIN_RESET_POSITION)
+		led_set_blink(tc->led_traction, 300, 300, 0);
 }
 
 
 static void traction_reverse_enable_safe(struct train_controller *tc)
 {
 	if (tc->moution_state > TRAIN_STOPPED) {
-		led_set_blink(tc->led_reverse, 100, 300, 3);
+		led_set_blink(tc->led_error, 300, 0, 1);
+		led_set_blink(tc->led_reverse, 50, 200, 3);
 		return;
 	}
 
@@ -195,7 +199,7 @@ static void traction_reverse_enable_safe(struct train_controller *tc)
 static void traction_reverse_disable_safe(struct train_controller *tc)
 {
 	if (tc->moution_state > TRAIN_STOPPED) {
-		led_set_blink(tc->led_reverse, 100, 300, 3);
+		led_set_blink(tc->led_error, 300, 0, 1);
 		return;
 	}
 

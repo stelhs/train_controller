@@ -42,7 +42,7 @@ void speedometer_timer(void *arg)
  * set speedomenetr indicator value
  * @param speed - speed value beetween
  */
-void speed_indicator_set(u8 speed)
+void speedometer_indicator_set(u8 speed)
 {
 	if (speed > SPEED_INDICATOR_MAX + 3)
 		speed = SPEED_INDICATOR_MAX + 3;
@@ -56,7 +56,7 @@ void speed_indicator_set(u8 speed)
  */
 u8 speedometer_get_speed(void)
 {
-	return sm.speed;
+	return sm.speed / 10;
 }
 
 

@@ -17,7 +17,7 @@ struct speedometer {
 };
 
 void speedometer_init(void);
-void speed_indicator_set(u8 speed);
+void speedometer_indicator_set(u8 speed);
 u8 speedometer_get_speed(void);
 
 #endif /* SPEEDOMETER_H_ */

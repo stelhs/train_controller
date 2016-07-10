@@ -17,7 +17,7 @@ static struct list list_motors = LIST_INIT;
 
 /* maximum interval between start waveform and enable semistor.
  * That means the minimum motor power */
-#define SEMISTOR_MAX_INTERVAL 220
+#define SEMISTOR_MAX_INTERVAL 230
 
 /* minimum interval between start waveform and enable semistor.
  * That means the maximum motor power.  */
