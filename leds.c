@@ -1,3 +1,4 @@
+#include <avr/interrupt.h>
 #include "types.h"
 #include "gpio.h"
 #include "leds.h"
@@ -6,26 +7,32 @@ static void led_timer_handler(void *arg)
 {
 	struct led *led = (struct led *)arg;
 
-	if(led->blink_timer > 1)
-		led->blink_timer--;
-
-	if(led->blink_timer > 1 || led->interval1 == 0)
+	if(!led->blink_timer)
 		return;
+
+	if(led->blink_timer > 1) {
+		led->blink_timer--;
+	}
+
+	if(led->blink_timer > 1 || led->interval1 == 0) {
+		return;
+	}
 
 	if (led->blink_counter == 1) {
 		gpio_set_value(led->gpio, OFF);
 		led->blink_timer = 0;
+		led->blink_counter = 0;
 		led->state = 0;
 		return;
 	}
 
 	if(led->state) {
 		gpio_set_value(led->gpio, OFF);
-		led->blink_timer = led->interval2 + 1;
+		led->blink_timer = led->interval2;
 		led->state = 0;
 	} else  {
 		gpio_set_value(led->gpio, ON);
-		led->blink_timer = led->interval1 + 1;
+		led->blink_timer = led->interval1;
 		if (led->blink_counter > 1)
 			led->blink_counter--;
 		led->state = 1;
@@ -86,10 +93,12 @@ void led_set_blink(struct led *led, t_counter interval1,
 		interval2 = interval1;
 
 	gpio_set_value(led->gpio, ON);
-	led->interval1 = interval1;
-	led->interval2 = interval2;
-	led->blink_timer = interval1 + 1;
+	cli();
+	led->interval1 = interval1 / 10 + 1;
+	led->interval2 = interval2 / 10 + 1;
+	led->blink_timer = led->interval1;
 	led->blink_counter = count ? (count + 1) : 0;
+	sei();
 }
 
 
