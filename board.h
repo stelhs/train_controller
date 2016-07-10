@@ -8,8 +8,13 @@
 #ifndef INIT_H_
 #define INIT_H_
 
+#include "gpio.h"
+#include "leds.h"
+#include "ac_motors.h"
+
 #define CLEAR_WATCHDOG() { asm("wdr"); }
 
+extern struct gpio gpio_list[];
 extern struct led led_ready;
 extern struct led led_error;
 extern struct led led_reverse;

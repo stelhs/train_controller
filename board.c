@@ -11,15 +11,13 @@
 #include "board.h"
 
 #include "ac_motors.h"
-#include "leds.h"
 #include "types.h"
+#include "idle.h"
 #include "gpio.h"
-#include "gpio_debouncer.h"
-#include "gpio_keys.h"
+#include "leds.h"
 #include "config.h"
 #include "uart.h"
 #include "ac_motors.h"
-#include "balance_regulator.h"
 #include "train_controller.h"
 #include "speedometer.h"
 
@@ -165,41 +163,10 @@ struct led led_traction = {
 	.gpio = gpio_list + 9
 };
 
-struct gpio_input input_gerkon = {
-	.gpio = gpio_list + 3,
-	.on_change = gerkon_state_changed
-};
-
-struct gpio_key traction_up = {
-	.input = {
-		.gpio = gpio_list + 0
-	},
-	.on_click = traction_up_handler
-};
-
-struct gpio_key traction_down = {
-	.input = {
-		.gpio = gpio_list + 2
-	},
-	.on_click = traction_down_handler
-};
-
-struct gpio_key traction_reset = {
-	.input = {
-		.gpio = gpio_list + 1
-	},
-	.on_click = traction_reset_handler,
-	.on_hold = traction_reverse_handler
-};
-
 struct uart console = {
 	.chip_id = 0,
 	.baud_rate = 9600,
 	.fdev_type = 1
-};
-
-struct balance_regulator power_balance_regulator = {
-	.on_change = power_balance_regulator_changed
 };
 
 struct ac_motor motor_left = {
@@ -226,19 +193,13 @@ static void board_init(void)
 	led_register(&led_reverse);
 	led_register(&led_traction);
 
-	gpio_debouncer_register_input(&input_gerkon);
-
-	gpio_keys_register_key(&traction_up);
-	gpio_keys_register_key(&traction_down);
-	gpio_keys_register_key(&traction_reset);
-
-	balance_regulator_init(&power_balance_regulator);
-
 	ac_motors_subsystem_init();
 	ac_motor_register(&motor_left);
 	ac_motor_register(&motor_right);
 
 	speedometer_init();
+
+	train_controller_init();
 
 	usart_init(&console);
 
