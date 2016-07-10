@@ -21,7 +21,7 @@
 #include "ac_motors.h"
 #include "balance_regulator.h"
 #include "train_controller.h"
-
+#include "speedometer.h"
 
 struct gpio gpio_list[] = {
 	{ // traction +1
@@ -58,8 +58,8 @@ struct gpio gpio_list[] = {
 	},
 	{ // tahogenerator
 		.direction_addr = (u8 *) &DDRD,
-		.port_addr = (u8 *) &PIND,
-		.pin_addr = (u8 *) &PORTD,
+		.port_addr = (u8 *) &PORTD,
+		.pin_addr = (u8 *) &PIND,
 		.pin = 3,
 		.direction = GPIO_INPUT,
 		.pull_up = 1
@@ -238,8 +238,11 @@ static void board_init(void)
 	ac_motor_register(&motor_left);
 	ac_motor_register(&motor_right);
 
+	speedometer_init();
+
 	usart_init(&console);
-//	wdt_enable(WDTO_2S);
+
+	wdt_enable(WDTO_2S);
 	sys_timer_init();
 	sei();
 }
