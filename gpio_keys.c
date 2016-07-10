@@ -56,22 +56,22 @@ static void gpio_keys_tsk(void *arg)
 	struct gpio_key *key = (struct gpio_key *)arg;
 
 	if (key->on_press_down && key->press_down_action) {
-		key->on_press_down(key);
+		key->on_press_down(key->priv);
 		key->press_down_action = 0;
 	}
 
 	if (key->on_press_up && key->press_up_action) {
-		key->on_press_up(key);
+		key->on_press_up(key->priv);
 		key->press_up_action = 0;
 	}
 
 	if (key->on_click && key->click_action) {
-		key->on_click(key);
+		key->on_click(key->priv);
 		key->click_action = 0;
 	}
 
 	if (key->on_hold && key->hold_action) {
-		key->on_hold(key, key->hold_counter);
+		key->on_hold(key->priv, key->hold_counter);
 		key->hold_action = 0;
 	}
 }

@@ -111,18 +111,21 @@ void ac_motor_set_power(struct ac_motor *motor, u8 power)
 
 void ac_motor_enable_forward(struct ac_motor *motor)
 {
+	ac_motor_set_power(motor, 0);
 	gpio_set_value(motor->power_backward, OFF);
 	gpio_set_value(motor->power_forward, ON);
 }
 
 void ac_motor_enable_bacward(struct ac_motor *motor)
 {
+	ac_motor_set_power(motor, 0);
 	gpio_set_value(motor->power_forward, OFF);
 	gpio_set_value(motor->power_backward, ON);
 }
 
 void ac_motor_disable(struct ac_motor *motor)
 {
+	ac_motor_set_power(motor, 0);
 	gpio_set_value(motor->power_backward, OFF);
 	gpio_set_value(motor->power_forward, OFF);
 }
