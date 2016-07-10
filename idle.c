@@ -8,6 +8,7 @@
 #include "types.h"
 #include "list.h"
 #include "idle.h"
+#include "board.h"
 
 static struct list list_subscribers = LIST_INIT;
 
@@ -22,6 +23,7 @@ void idle(void)
 		struct sys_work *wrk = list_ledata(le);
 		wrk->handler(wrk->priv);
 	}
+	CLEAR_WATCHDOG();
 }
 
 void sys_idle_add_handler(struct sys_work *wrk)
