@@ -12,7 +12,7 @@
 struct gpio_input
 {
 	struct gpio *gpio;
-	void (*on_change)(void *);
+	void (*on_change)(void *, u8);
 	u8 stable_state :1;
 	void *priv;
 

@@ -31,7 +31,7 @@ static void idle_handler(void *arg)
 
 	balance->value = ((val - 512) * 50 / 512) * 2;
 	if (balance->value != balance->prev_value && balance->on_change) {
-		balance->on_change(balance->value);
+		balance->on_change(balance->priv, balance->value);
 		balance->prev_value = balance->value;
 	}
 }

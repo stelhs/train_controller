@@ -14,7 +14,8 @@ struct balance_regulator {
 	s16 value; /* from -100% to 100% */
 	s16 prev_value;
 	struct sys_work wrk;
-	void (*on_change)(s16 value);
+	void (*on_change)(void *, s16 value);
+	void *priv;
 };
 
 void balance_regulator_init(struct balance_regulator *balance);
