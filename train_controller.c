@@ -27,10 +27,11 @@
  */
 static u8 position_power_table[] = {
 	0,
-	20,
-	30,
-	55,
-	75,
+	42,
+	49,
+	56,
+	66,
+	78,
 	100,
 };
 
@@ -45,6 +46,7 @@ enum train_motions {
 	TRAIN_POSITION_2,        //!< TRAIN_POSITION_2
 	TRAIN_POSITION_3,        //!< TRAIN_POSITION_3
 	TRAIN_POSITION_4,        //!< TRAIN_POSITION_4
+	TRAIN_POSITION_5,        //!< TRAIN_POSITION_4
 	TRAIN_POSITION_LAST,     //!< TRAIN_POSITION_LAST
 };
 
@@ -216,8 +218,8 @@ static void ready_state_changed(void *arg, u8 state)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
 
-	tc->ready = state;
-	if (state) {
+	tc->ready = !state;
+	if (tc->ready) {
 		led_on(tc->led_ready);
 		return;
 	}
