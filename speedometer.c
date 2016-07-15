@@ -56,7 +56,7 @@ void speedometer_indicator_set(u8 speed)
  */
 u8 speedometer_get_speed(void)
 {
-	return sm.speed / 9;
+	return (u8)((u32)sm.speed * 10 / 85);
 }
 
 
