@@ -35,6 +35,12 @@ typedef u32 t_counter;
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-#define EINVAL 22
+#define	EIO		 5	/* I/O error */
+#define	EINVAL		22	/* Invalid argument */
+#define	ENOSPC		28	/* No space left on device */
+#define	ENODATA		61	/* No data available */
+#define	ECORRUPT	129	/* Data is corrupted */
+
+
 
 #endif /* TYPES_H_ */
