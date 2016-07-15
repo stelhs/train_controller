@@ -115,7 +115,6 @@ void train_controller_work(void *arg)
 	if (tc->ui_state != UI_TRAIN)
 		return;
 
-	speedometer_indicator_set(speed);
 
 	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 0) {
 		ac_motor_disable(tc->motor_left);
@@ -271,7 +270,7 @@ static void handler_click_button_traction_up(void *arg)
 	/* check for speed limit */
 	if (tc->moution_state > TRAIN_POSITION_1) {
 		speed = speedometer_get_speed();
-		if (speed < position_min_speed_table[tc->moution_state]) {
+		if (speed > position_min_speed_table[tc->moution_state]) {
 			led_set_blink(tc->led_error, 100, 0, 2);
 			return;
 		}

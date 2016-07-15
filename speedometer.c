@@ -22,7 +22,7 @@ void odometer_timer(void *arg);
 void speedometer_work(void *arg);
 static struct speedometer sm = {
 	.speed_timer = {
-		.devisor = 200,
+		.devisor = 100,
 		.handler = speedometer_timer,
 	},
 
@@ -63,6 +63,7 @@ void speedometer_work(void *arg)
 	u8 speed_km, speed_m;
 	speed_km = (u8)((u32)sm.speed * 10 / 85);
 	speed_m = (u32)sm.speed_km * 1000 / 3600;
+	speedometer_indicator_set(speed_km);
 
 	cli();
 	sm.speed_km = speed_km;
@@ -126,7 +127,7 @@ void speedometer_init(void)
 	sm.save_distance_flag = 0;
 
 	sys_timer_add_handler(&sm.speed_timer);
-//	sys_timer_add_handler(&sm.odometer_timer);
+	sys_timer_add_handler(&sm.odometer_timer);
 	sys_idle_add_handler(&sm.wrk);
 }
 
