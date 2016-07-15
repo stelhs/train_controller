@@ -36,6 +36,19 @@ static u8 position_power_table[] = {
 };
 
 /**
+ * Increase position limitation by speed
+ */
+static u8 position_min_speed_table[] = {
+	0,
+	0, // first position may be enable from speed 0
+	2, // second position may be enable from speed 2
+	7, // ...
+	12,
+	17,
+	21,
+};
+
+/**
  * Train motions states
  */
 enum train_motions {
@@ -240,6 +253,7 @@ static void handler_ready_state_changed(void *arg, u8 state)
 static void handler_click_button_traction_up(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+	u8 speed;
 
 	if (tc->ui_state != UI_TRAIN)
 		return;
@@ -248,6 +262,16 @@ static void handler_click_button_traction_up(void *arg)
 		led_set_blink(tc->led_error, 300, 0, 1);
 		return;
 	}
+
+	/* check for speed limit */
+	if (tc->moution_state > TRAIN_POSITION_1) {
+		speed = speedometer_get_speed();
+		if (speed < position_min_speed_table[tc->moution_state]) {
+			led_set_blink(tc->led_error, 100, 0, 2);
+			return;
+		}
+	}
+
 
 	traction_inc_position_safe(tc);
 }
