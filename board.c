@@ -200,7 +200,6 @@ static void board_init(void)
 
 	eeprom_init_fs();
 	speedometer_init();
-
 	train_controller_init();
 
 	usart_init(&console);

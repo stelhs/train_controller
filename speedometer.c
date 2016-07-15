@@ -94,6 +94,16 @@ u8 speedometer_get_speed(void)
 }
 
 
+/**
+ * Return odometer value
+ * @return
+ */
+u16 speedometer_get_odometer(void)
+{
+	return sm.distance_km;
+}
+
+
 void speedometer_init(void)
 {
 	int rc;

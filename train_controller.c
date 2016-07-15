@@ -50,6 +50,11 @@ enum train_motions {
 	TRAIN_POSITION_LAST,     //!< TRAIN_POSITION_LAST
 };
 
+enum ui_state {
+	UI_TRAIN,
+	UI_ODOMETER
+};
+
 struct train_controller {
 	struct ac_motor *motor_left;
 	struct ac_motor *motor_right;
@@ -61,6 +66,7 @@ struct train_controller {
 	u8 prev_ready :1;
 	u8 reverse :1;
 	enum train_motions moution_state;
+	enum ui_state ui_state;
 	u8 power;
 	s16 balance;
 	struct sys_timer timer;
@@ -214,9 +220,12 @@ static void traction_reverse_disable_safe(struct train_controller *tc)
  * @param arg - struct train_controller
  * @param state - new state
  */
-static void ready_state_changed(void *arg, u8 state)
+static void handler_ready_state_changed(void *arg, u8 state)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
 
 	tc->ready = !state;
 	if (tc->ready) {
@@ -228,9 +237,13 @@ static void ready_state_changed(void *arg, u8 state)
 	traction_reset_position_safe(tc);
 }
 
-static void button_up_handler(void *arg)
+static void handler_click_button_traction_up(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
+
 	if (!tc->ready) {
 		led_set_blink(tc->led_error, 300, 0, 1);
 		return;
@@ -239,9 +252,13 @@ static void button_up_handler(void *arg)
 	traction_inc_position_safe(tc);
 }
 
-static void button_reset_handler(void *arg)
+static void handler_click_button_traction_reset(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
+
 	if (!tc->ready) {
 		led_set_blink(tc->led_error, 300, 0, 1);
 		return;
@@ -250,9 +267,13 @@ static void button_reset_handler(void *arg)
 	traction_reset_position_safe(tc);
 }
 
-static void button_down_handler(void *arg)
+static void handler_click_button_traction_down(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
+
 	if (!tc->ready) {
 		led_set_blink(tc->led_error, 300, 0, 1);
 		return;
@@ -262,9 +283,12 @@ static void button_down_handler(void *arg)
 }
 
 
-void button_reverse_handler(void *arg, t_counter hold_counter)
+void handler_hold_button_traction_reverse(void *arg, t_counter hold_counter)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
 
 	if (!tc->ready) {
 		led_set_blink(tc->led_error, 300, 0, 1);
@@ -281,11 +305,67 @@ void button_reverse_handler(void *arg, t_counter hold_counter)
 }
 
 
-static void balance_regulator_changed(void *arg, s16 value)
+static void handler_balance_regulator_changed(void *arg, s16 value)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
+
 	tc->balance = value;
 	traction_set_power(tc, tc->power);
+}
+
+
+static void handler_down_button_traction_up(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	u16 dist;
+	u8 val;
+
+	if (tc->ui_state != UI_ODOMETER)
+		return;
+
+	dist = speedometer_get_odometer();
+	val = dist % 40;
+	speedometer_indicator_set(val);
+}
+
+
+static void handler_up_button_traction_up(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_ODOMETER)
+		return;
+
+	speedometer_indicator_set(0);
+}
+
+
+static void handler_down_button_traction_down(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	u16 dist;
+	u8 val;
+
+	if (tc->ui_state != UI_ODOMETER)
+		return;
+
+	dist = speedometer_get_odometer();
+	val = dist / 40;
+	speedometer_indicator_set(val);
+}
+
+
+static void handler_up_button_traction_down(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+
+	if (tc->ui_state != UI_ODOMETER)
+		return;
+
+	speedometer_indicator_set(0);
 }
 
 
@@ -317,7 +397,7 @@ static struct train_controller tc = {
 
 static struct gpio_input ready_gerkon = {
 	.gpio = gpio_list + 3,
-	.on_change = ready_state_changed,
+	.on_change = handler_ready_state_changed,
 	.priv = &tc
 };
 
@@ -325,7 +405,9 @@ static struct gpio_key traction_up = {
 	.input = {
 		.gpio = gpio_list + 0
 	},
-	.on_click = button_up_handler,
+	.on_click = handler_click_button_traction_up,
+	.on_press_down = handler_down_button_traction_up,
+	.on_press_up = handler_up_button_traction_up,
 	.priv = &tc
 };
 
@@ -333,8 +415,8 @@ static struct gpio_key traction_reset = {
 	.input = {
 		.gpio = gpio_list + 1
 	},
-	.on_click = button_reset_handler,
-	.on_hold = button_reverse_handler,
+	.on_click = handler_click_button_traction_reset,
+	.on_hold = handler_hold_button_traction_reverse,
 	.priv = &tc
 };
 
@@ -342,24 +424,39 @@ static struct gpio_key traction_down = {
 	.input = {
 		.gpio = gpio_list + 2
 	},
-	.on_click = button_down_handler,
+	.on_click = handler_click_button_traction_down,
+	.on_press_down = handler_down_button_traction_down,
+	.on_press_up = handler_up_button_traction_down,
 	.priv = &tc
 };
 
 
 static struct balance_regulator power_balance_regulator = {
-	.on_change = balance_regulator_changed,
+	.on_change = handler_balance_regulator_changed,
 	.priv = &tc
 };
 
 
 void train_controller_init(void)
 {
-	gpio_debouncer_register_input(&ready_gerkon);
 	gpio_keys_register_key(&traction_up);
 	gpio_keys_register_key(&traction_reset);
 	gpio_keys_register_key(&traction_down);
+
+	/* if hold button UP on power enable, then activate odometer */
+	if (traction_up.input.stable_state == 0) {
+		tc.ui_state = UI_ODOMETER;
+		led_on(tc.led_error);
+		led_on(tc.led_ready);
+		led_on(tc.led_reverse);
+		led_on(tc.led_traction);
+		return;
+	}
+
+	gpio_debouncer_register_input(&ready_gerkon);
 	balance_regulator_init(&power_balance_regulator);
 	sys_timer_add_handler(&tc.timer);
 	sys_idle_add_handler(&tc.wrk);
+
+	tc.ui_state = UI_TRAIN;
 }

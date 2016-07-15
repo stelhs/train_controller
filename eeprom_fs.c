@@ -73,10 +73,10 @@ void eeprom_init_fs(void)
 	int rc;
 	rc = check_fs_marker();
 	if (!rc)
-		return 0;
+		return;
 
 	eeprom_fs_format();
-	return 0;
+	return;
 }
 
 
