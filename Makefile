@@ -28,4 +28,4 @@ program: $(EXEC)
 	sudo avrdude -p m32 -c usbasp -e -U flash:w:$(EXEC)
 
 fuse:
-	sudo avrdude -p m32 -c usbasp -U lfuse:w:0x8e:m -U hfuse:w:0xd9:m
+	sudo avrdude -p m32 -c usbasp -U lfuse:w:0x8e:m -U hfuse:w:0xd1:m
