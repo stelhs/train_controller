@@ -60,9 +60,13 @@ void odometer_timer(void *arg)
 
 void speedometer_work(void *arg)
 {
+	u8 speed_km, speed_m;
+	speed_km = (u8)((u32)sm.speed * 10 / 85);
+	speed_m = (u32)sm.speed_km * 1000 / 3600;
+
 	cli();
-	sm.speed_km = (u8)((u32)sm.speed * 10 / 85);
-	sm.speed_m = (u32)sm.speed_km * 1000 / 3600;
+	sm.speed_km = speed_km;
+	sm.speed_m = speed_m;
 	sei();
 
 	if (sm.save_distance_flag) {
@@ -122,7 +126,7 @@ void speedometer_init(void)
 	sm.save_distance_flag = 0;
 
 	sys_timer_add_handler(&sm.speed_timer);
-	sys_timer_add_handler(&sm.odometer_timer);
+//	sys_timer_add_handler(&sm.odometer_timer);
 	sys_idle_add_handler(&sm.wrk);
 }
 
