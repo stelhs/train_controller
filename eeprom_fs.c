@@ -65,6 +65,20 @@ static int check_fs_marker(void)
 	return 0;
 }
 
+/**
+ * Init file system
+ */
+void eeprom_init_fs(void)
+{
+	int rc;
+	rc = check_fs_marker();
+	if (!rc)
+		return 0;
+
+	eeprom_fs_format();
+	return 0;
+}
+
 
 /**
  * Find and return struct eeprom_file form EEPROM file system
@@ -178,6 +192,11 @@ int eeprom_create_file(char *filename, int size)
 
 	rc = check_fs_marker();
 	if (rc)
+		return rc;
+
+	/* check if file exist */
+	rc = eeprom_file_find(filename, &f);
+	if (rc > 0)
 		return rc;
 
 	rc = eeprom_get_free_space_pointer();

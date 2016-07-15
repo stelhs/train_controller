@@ -20,6 +20,7 @@
 #include "ac_motors.h"
 #include "train_controller.h"
 #include "speedometer.h"
+#include "eeprom_fs.h"
 
 struct gpio gpio_list[] = {
 	{ // traction +1
@@ -197,6 +198,7 @@ static void board_init(void)
 	ac_motor_register(&motor_left);
 	ac_motor_register(&motor_right);
 
+	eeprom_init_fs();
 	speedometer_init();
 
 	train_controller_init();
@@ -205,6 +207,7 @@ static void board_init(void)
 
 	wdt_enable(WDTO_2S);
 	sys_timer_init();
+
 	sei();
 }
 

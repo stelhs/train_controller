@@ -10,17 +10,29 @@
 #include "list.h"
 #include "sys_timer.h"
 #include "speedometer.h"
+#include "eeprom_fs.h"
 #include "gpio.h"
 
 #define SPEED_INDICATOR_MAX 40 /* max speed value Km/h */
 #define SPEED_INDICATOR_PWM_MAX 235 /* max PWD output value */
 
+
 void speedometer_timer(void *arg);
+void odometer_timer(void *arg);
+void speedometer_work(void *arg);
 static struct speedometer sm = {
-	.timer = {
-		.devisor = 100,
+	.speed_timer = {
+		.devisor = 200,
 		.handler = speedometer_timer,
-		.priv = &sm,
+	},
+
+	.odometer_timer = {
+		.devisor = 1000,
+		.handler = odometer_timer,
+	},
+
+	.wrk = {
+		.handler = speedometer_work,
 	},
 	.speed = 0,
 };
@@ -31,11 +43,33 @@ ISR(INT1_vect)
 	sm.taho_counter ++;
 }
 
-
 void speedometer_timer(void *arg)
 {
 	sm.speed = sm.taho_counter;
 	sm.taho_counter = 0;
+}
+
+void odometer_timer(void *arg)
+{
+	sm.distance += sm.speed_m;
+	if (sm.distance >= 1000) {
+		sm.save_distance_flag = 1;
+		sm.distance = 0;
+	}
+}
+
+void speedometer_work(void *arg)
+{
+	cli();
+	sm.speed_km = (u8)((u32)sm.speed * 10 / 85);
+	sm.speed_m = (u32)sm.speed_km * 1000 / 3600;
+	sei();
+
+	if (sm.save_distance_flag) {
+		sm.save_distance_flag = 0;
+		sm.distance_km ++;
+		eeprom_write_file("dist", (u8 *)&sm.distance_km);
+	}
 }
 
 /**
@@ -56,17 +90,30 @@ void speedometer_indicator_set(u8 speed)
  */
 u8 speedometer_get_speed(void)
 {
-	return (u8)((u32)sm.speed * 10 / 85);
+	return sm.speed_km;
 }
 
 
 void speedometer_init(void)
 {
+	int rc;
+
 	/* configure external interrupts for Int1 */
 	MCUCR |= _BV(ISC10);
 	GICR |= _BV(INT1);
 
-	sys_timer_add_handler(&sm.timer);
+	rc = eeprom_read_file("dist", (u8 *)&sm.distance_km);
+	if (rc < 0) {
+		eeprom_create_file("dist", sizeof(sm.distance_km));
+		sm.distance_km = 0;
+	}
+
+	sm.distance = 0;
+	sm.save_distance_flag = 0;
+
+	sys_timer_add_handler(&sm.speed_timer);
+	sys_timer_add_handler(&sm.odometer_timer);
+	sys_idle_add_handler(&sm.wrk);
 }
 
 
