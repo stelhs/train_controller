@@ -58,6 +58,7 @@ static void eeprom_write_block_safe(u8 *source, u8 *dest, u16 size)
 static int check_fs_marker(void)
 {
 	u16 marker;
+
 	eeprom_read_block(&marker, 0, 2);
 	if (marker != EEPROM_FS_MARKER)
 		return -EIO;
@@ -72,6 +73,7 @@ void eeprom_init_fs(void)
 {
 	int rc;
 	rc = check_fs_marker();
+
 	if (!rc)
 		return;
 
@@ -188,6 +190,7 @@ int eeprom_read_file(char *filename, u8 *returned_data)
 int eeprom_create_file(char *filename, int size)
 {
 	int rc;
+	int counter;
 	struct eeprom_file f;
 
 	rc = check_fs_marker();
@@ -202,9 +205,12 @@ int eeprom_create_file(char *filename, int size)
 	rc = eeprom_get_free_space_pointer();
 	if(!rc)
 		return -ENOSPC;
+	counter = rc;
+
 	strcpy(f.filename, filename);
 	f.marker = EEPROM_FILE_MARKER;
 	f.size = size;
+	eeprom_write_block_safe((u8 *)&f, (void *)counter, sizeof(f));
 	return 0;
 }
 

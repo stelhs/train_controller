@@ -109,9 +109,13 @@ void train_controller_work(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
 	u8 speed = speedometer_get_speed();
-	speedometer_indicator_set(speed);
 
 	CLEAR_WATCHDOG();
+
+	if (tc->ui_state != UI_TRAIN)
+		return;
+
+	speedometer_indicator_set(speed);
 
 	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 0) {
 		ac_motor_disable(tc->motor_left);
@@ -250,6 +254,7 @@ static void handler_ready_state_changed(void *arg, u8 state)
 	traction_reset_position_safe(tc);
 }
 
+
 static void handler_click_button_traction_up(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
@@ -279,7 +284,6 @@ static void handler_click_button_traction_up(void *arg)
 static void handler_click_button_traction_reset(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-
 	if (tc->ui_state != UI_TRAIN)
 		return;
 
@@ -467,8 +471,10 @@ void train_controller_init(void)
 	gpio_keys_register_key(&traction_reset);
 	gpio_keys_register_key(&traction_down);
 
+	sys_idle_add_handler(&tc.wrk);
+
 	/* if hold button UP on power enable, then activate odometer */
-	if (traction_up.input.stable_state == 0) {
+	if (gpio_get_state(traction_up.input.gpio) == 0) {
 		tc.ui_state = UI_ODOMETER;
 		led_on(tc.led_error);
 		led_on(tc.led_ready);
@@ -480,7 +486,6 @@ void train_controller_init(void)
 	gpio_debouncer_register_input(&ready_gerkon);
 	balance_regulator_init(&power_balance_regulator);
 	sys_timer_add_handler(&tc.timer);
-	sys_idle_add_handler(&tc.wrk);
 
 	tc.ui_state = UI_TRAIN;
 }

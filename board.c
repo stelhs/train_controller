@@ -188,6 +188,9 @@ struct ac_motor motor_right = {
  */
 static void board_init(void)
 {
+	sys_timer_init();
+	usart_init(&console);
+
 	gpio_register_list(gpio_list);
 	led_register(&led_ready);
 	led_register(&led_error);
@@ -202,10 +205,7 @@ static void board_init(void)
 	speedometer_init();
 	train_controller_init();
 
-	usart_init(&console);
-
 	wdt_enable(WDTO_2S);
-	sys_timer_init();
 
 	sei();
 }
