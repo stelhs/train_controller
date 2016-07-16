@@ -182,6 +182,21 @@ struct ac_motor motor_right = {
 	.power_backward = gpio_list + 12,
 };
 
+/* Run from ac_motor when external power is loss.
+ * Run from IRQ. */
+void callback_external_power_loss(void)
+{
+	led_off(&led_error);
+	led_off(&led_ready);
+	led_off(&led_reverse);
+	led_off(&led_traction);
+	odometer_save_state();
+	led_on(&led_error);
+	led_on(&led_ready);
+	led_on(&led_reverse);
+	led_on(&led_traction);
+}
+
 
 /**
  * Init board hardware

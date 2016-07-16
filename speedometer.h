@@ -19,15 +19,13 @@ struct speedometer {
 	u8 speed_km; /* Speed in km/hour */
 	u8 speed_m; /* Speed in m/sec */
 	u16 taho_counter;
-	u32 distance; /* distance in meters (no more 1000 meters) */
-	u16 distance_km; /* distance in kilometers */
-	u8 save_distance_flag :1;
-
+	u32 distance; /* distance in meters */
 };
 
 void speedometer_init(void);
 void speedometer_indicator_set(u8 speed);
 u8 speedometer_get_speed(void);
-u16 speedometer_get_odometer(void);
+u16 odometer_get_value(void);
+void odometer_save_state(void);
 
 #endif /* SPEEDOMETER_H_ */

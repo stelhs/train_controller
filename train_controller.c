@@ -114,6 +114,7 @@ void train_controller_work(void *arg)
 	if (tc->ui_state != UI_TRAIN)
 		return;
 
+	speedometer_indicator_set(speed);
 
 	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 0) {
 		ac_motor_disable(tc->motor_left);
@@ -352,7 +353,7 @@ static void handler_down_button_traction_up(void *arg)
 	if (tc->ui_state != UI_ODOMETER)
 		return;
 
-	dist = speedometer_get_odometer();
+	dist = odometer_get_value() / 1000;
 	val = dist % 40;
 	speedometer_indicator_set(val);
 }
@@ -378,7 +379,7 @@ static void handler_down_button_traction_down(void *arg)
 	if (tc->ui_state != UI_ODOMETER)
 		return;
 
-	dist = speedometer_get_odometer();
+	dist = odometer_get_value() / 1000;
 	val = dist / 40;
 	speedometer_indicator_set(val);
 }

@@ -22,4 +22,6 @@ extern struct led led_traction;
 extern struct ac_motor motor_left;
 extern struct ac_motor motor_right;
 
+void callback_external_power_loss(void);
+
 #endif /* INIT_H_ */

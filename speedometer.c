@@ -52,10 +52,6 @@ void speedometer_timer(void *arg)
 void odometer_timer(void *arg)
 {
 	sm.distance += sm.speed_m;
-	if (sm.distance >= 1000) {
-		sm.save_distance_flag = 1;
-		sm.distance = 0;
-	}
 }
 
 void speedometer_work(void *arg)
@@ -63,18 +59,11 @@ void speedometer_work(void *arg)
 	u8 speed_km, speed_m;
 	speed_km = (u8)((u32)sm.speed * 10 / 85);
 	speed_m = (u32)sm.speed_km * 1000 / 3600;
-	speedometer_indicator_set(speed_km);
 
 	cli();
 	sm.speed_km = speed_km;
 	sm.speed_m = speed_m;
 	sei();
-
-	if (sm.save_distance_flag) {
-		sm.save_distance_flag = 0;
-		sm.distance_km ++;
-		eeprom_write_file("dist", (u8 *)&sm.distance_km);
-	}
 }
 
 /**
@@ -100,14 +89,21 @@ u8 speedometer_get_speed(void)
 
 
 /**
- * Return odometer value
+ * Return odometer value in meters
  * @return
  */
-u16 speedometer_get_odometer(void)
+u16 odometer_get_value(void)
 {
-	return sm.distance_km;
+	return sm.distance;
 }
 
+#include "leds.h"
+#include "board.h"
+/* Save odometer state into flash */
+void odometer_save_state(void)
+{
+	eeprom_write_file("dist", (u8 *)&sm.distance);
+}
 
 void speedometer_init(void)
 {
@@ -117,14 +113,12 @@ void speedometer_init(void)
 	MCUCR |= _BV(ISC10);
 	GICR |= _BV(INT1);
 
-	rc = eeprom_read_file("dist", (u8 *)&sm.distance_km);
+//	eeprom_fs_format();
+	rc = eeprom_read_file("dist", (u8 *)&sm.distance);
 	if (rc < 0) {
-		eeprom_create_file("dist", sizeof(sm.distance_km));
-		sm.distance_km = 0;
+		eeprom_create_file("dist", sizeof(sm.distance));
+		sm.distance = 0;
 	}
-
-	sm.distance = 0;
-	sm.save_distance_flag = 0;
 
 	sys_timer_add_handler(&sm.speed_timer);
 	sys_timer_add_handler(&sm.odometer_timer);
