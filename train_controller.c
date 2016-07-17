@@ -27,10 +27,10 @@
  */
 static u8 position_power_table[] = {
 	0,
-	42,
-	49,
-	56,
-	66,
+	46,
+	50,
+	57,
+	67,
 	78,
 	100,
 };
@@ -40,11 +40,11 @@ static u8 position_power_table[] = {
  */
 static u8 position_min_speed_table[] = {
 	0, // first position may be enable from speed 0
-	3, // second position may be enable from speed 2
-	8, // ...
-	13,
-	18,
-	21,
+	2, // second position may be enable from speed 2
+	7, // ...
+	12,
+	17,
+	20,
 };
 
 /**
