@@ -116,7 +116,7 @@ void train_controller_work(void *arg)
 
 	speedometer_indicator_set(speed);
 
-	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 0) {
+	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 2) {
 		ac_motor_disable(tc->motor_left);
 		cli();
 		tc->moution_state = TRAIN_STOPPED;
@@ -124,14 +124,14 @@ void train_controller_work(void *arg)
 		led_off(tc->led_traction);
 	}
 
-	if (tc->moution_state == TRAIN_STOPPED && speed > 0) {
+	if (tc->moution_state == TRAIN_STOPPED && speed > 2) {
 		cli();
 		tc->moution_state = TRAIN_IDLE;
 		sei();
 		led_set_blink(tc->led_traction, 600, 600, 0);
 	}
 
-	if (tc->moution_state == TRAIN_IDLE && speed == 0) {
+	if (tc->moution_state == TRAIN_IDLE && speed <= 2) {
 		cli();
 		tc->moution_state = TRAIN_STOPPED;
 		sei();
@@ -443,6 +443,7 @@ static struct gpio_key traction_reset = {
 		.gpio = gpio_list + 1
 	},
 	.on_click = handler_click_button_traction_reset,
+	.on_press_down = handler_click_button_traction_reset,
 	.on_hold = handler_hold_button_traction_reverse,
 	.priv = &tc
 };
