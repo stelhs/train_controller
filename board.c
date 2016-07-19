@@ -203,6 +203,9 @@ void callback_external_power_loss(void)
  */
 static void board_init(void)
 {
+	int rc;
+	u16 power_on_cnt;
+
 	sys_timer_init();
 	usart_init(&console);
 
@@ -219,6 +222,14 @@ static void board_init(void)
 	eeprom_init_fs();
 	speedometer_init();
 	train_controller_init();
+
+	rc = eeprom_read_file("poweron", (u8 *)&power_on_cnt);
+	if (rc < 0) {
+		eeprom_create_file("poweron", sizeof(power_on_cnt));
+		power_on_cnt = 0;
+	}
+	power_on_cnt++;
+	eeprom_write_file("poweron", (u8 *)&power_on_cnt);
 
 	wdt_enable(WDTO_2S);
 
