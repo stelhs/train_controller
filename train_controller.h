@@ -10,5 +10,6 @@
 #include "types.h"
 
 void train_controller_init(void);
+void train_controller_save_state(void);
 
 #endif /* TRAIN_CONTROLLER_H_ */

@@ -19,6 +19,7 @@
 #include "gpio_keys.h"
 #include "balance_regulator.h"
 #include "leds.h"
+#include "eeprom_fs.h"
 
 #define STATIC_TRACTION_BALANCE 0
 
@@ -83,15 +84,19 @@ struct train_controller {
 	s16 balance;
 	struct sys_timer timer;
 	struct sys_work wrk;
+	u32 work_time; /* work time counter in seconds */
+	u8 max_speed; /* maximum speed in km/h */
 };
 
 
 /**
- * run once at second
+ * run once at one second
  */
 void train_controller_timer(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
+
+	tc->work_time++;
 
 	if (tc->moution_state > TRAIN_RESET_POSITION &&
 		tc->moution_state < TRAIN_POSITION_LAST) {
@@ -113,6 +118,13 @@ void train_controller_work(void *arg)
 
 	if (tc->ui_state != UI_TRAIN)
 		return;
+
+	/* if the belt broke, then don`t save maximal speed */
+	if (speed > 50)
+		tc->max_speed = 0xff;
+
+	if (speed > tc->max_speed)
+		tc->max_speed = speed;
 
 	speedometer_indicator_set(speed);
 
@@ -411,7 +423,7 @@ static struct train_controller tc = {
 	.led_reverse = &led_reverse,
 	.led_traction = &led_traction,
 	.timer = {
-		.devisor = 2000,
+		.devisor = 1000,
 		.handler = train_controller_timer,
 		.priv = &tc,
 	},
@@ -465,8 +477,18 @@ static struct balance_regulator power_balance_regulator = {
 };
 
 
+/* Save controller state into flash */
+void train_controller_save_state(void)
+{
+	if (tc.max_speed < 0xff)
+		eeprom_write_file("maxspd", (u8 *)&tc.max_speed);
+	eeprom_write_file("wrktime", (u8 *)&tc.work_time);
+}
+
+
 void train_controller_init(void)
 {
+	int rc;
 	gpio_keys_register_key(&traction_up);
 	gpio_keys_register_key(&traction_reset);
 	gpio_keys_register_key(&traction_down);
@@ -485,6 +507,19 @@ void train_controller_init(void)
 
 	gpio_debouncer_register_input(&ready_gerkon);
 	balance_regulator_init(&power_balance_regulator);
+
+	rc = eeprom_read_file("wrktime", (u8 *)&tc.work_time);
+	if (rc < 0) {
+		eeprom_create_file("wrktime", sizeof(tc.work_time));
+		tc.work_time = 0;
+	}
+
+	rc = eeprom_read_file("maxspd", (u8 *)&tc.max_speed);
+	if (rc < 0) {
+		eeprom_create_file("maxspd", sizeof(tc.max_speed));
+		tc.max_speed = 0;
+	}
+
 	sys_timer_add_handler(&tc.timer);
 
 	tc.ui_state = UI_TRAIN;
