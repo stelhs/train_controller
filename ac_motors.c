@@ -28,7 +28,7 @@ static struct list list_motors = LIST_INIT;
 
 /* maximum interval between two tick (100Hz).
  * Used for detect the lack of external power */
-#define EXTERNAL_POWER_INTERVAL 400
+#define EXTERNAL_POWER_INTERVAL 4000
 u16 external_power = EXTERNAL_POWER_INTERVAL;
 
 
