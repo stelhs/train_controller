@@ -30,12 +30,16 @@ static struct list list_motors = LIST_INIT;
  * Used for detect the lack of external power */
 #define EXTERNAL_POWER_INTERVAL 4000
 u16 external_power = EXTERNAL_POWER_INTERVAL;
+u8 external_power_loss = 0;
 
 
 /* input AC signal 100Hz irq handler */
 ISR(INT0_vect)
 {
 	struct le *le;
+	if (external_power > 0)
+		external_power_loss = 0;
+
 	external_power = EXTERNAL_POWER_INTERVAL;
 	LIST_FOREACH(&list_motors, le) {
 		struct ac_motor *motor = list_ledata(le);
@@ -58,8 +62,10 @@ ISR(TIMER0_OVF_vect)
 
 	/* if external power is loss */
 	if (external_power == 1) {
-		callback_external_power_loss();
+		if (external_power_loss == 0)
+			callback_external_power_loss();
 		external_power = 0;
+		external_power_loss = 1;
 	}
 
 	LIST_FOREACH(&list_motors, le) {
