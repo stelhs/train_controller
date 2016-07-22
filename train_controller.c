@@ -28,11 +28,11 @@
  */
 static u8 position_power_table[] = {
 	0,
-	43,
-	48,
-	57,
-	67,
-	78,
+	40,
+	44,
+	54,
+	60,
+	70,
 	100,
 };
 
@@ -42,8 +42,8 @@ static u8 position_power_table[] = {
 static u8 position_min_speed_table[] = {
 	0, // first position may be enable from speed 0
 	1, // second position may be enable from speed 2
-	7, // ...
-	12,
+	1, // ...
+	3,
 	17,
 	20,
 };
@@ -128,7 +128,7 @@ void train_controller_work(void *arg)
 
 	speedometer_indicator_set(speed);
 
-	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 2) {
+	if (tc->moution_state == TRAIN_RESET_POSITION && speed == 0) {
 		ac_motor_disable(tc->motor_left);
 		cli();
 		tc->moution_state = TRAIN_STOPPED;
@@ -136,14 +136,14 @@ void train_controller_work(void *arg)
 		led_off(tc->led_traction);
 	}
 
-	if (tc->moution_state == TRAIN_STOPPED && speed > 2) {
+	if (tc->moution_state == TRAIN_STOPPED && speed > 0) {
 		cli();
 		tc->moution_state = TRAIN_IDLE;
 		sei();
 		led_set_blink(tc->led_traction, 600, 600, 0);
 	}
 
-	if (tc->moution_state == TRAIN_IDLE && speed <= 2) {
+	if (tc->moution_state == TRAIN_IDLE && speed == 0) {
 		cli();
 		tc->moution_state = TRAIN_STOPPED;
 		sei();
