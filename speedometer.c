@@ -52,18 +52,29 @@ void speedometer_timer(void *arg)
 void odometer_timer(void *arg)
 {
 	sm.distance += sm.speed_m;
+	sm.distance_tmp ++;
 }
 
 void speedometer_work(void *arg)
 {
 	u8 speed_km, speed_m;
+	u16 speed_tmp;
 	speed_km = (u8)((u32)sm.speed * 10 / 85);
 	speed_m = (u32)sm.speed_km * 1000 / 3600;
 
 	cli();
 	sm.speed_km = speed_km;
 	sm.speed_m = speed_m;
+	speed_tmp = sm.distance_tmp;
 	sei();
+
+	/* save odometer state each 1000 meters */
+	if (speed_tmp > 1000) {
+		odometer_save_state();
+		cli();
+		sm.distance_tmp = 0;
+		sei();
+	}
 }
 
 /**
@@ -119,6 +130,8 @@ void speedometer_init(void)
 		eeprom_create_file("dist", sizeof(sm.distance));
 		sm.distance = 0;
 	}
+
+	sm.distance_tmp = 0;
 
 	sys_timer_add_handler(&sm.speed_timer);
 	sys_timer_add_handler(&sm.odometer_timer);

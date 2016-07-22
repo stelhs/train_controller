@@ -20,6 +20,7 @@ struct speedometer {
 	u8 speed_m; /* Speed in m/sec */
 	u16 taho_counter;
 	u32 distance; /* distance in meters */
+	u16 distance_tmp; /* distance between 0 to 1000 meters */
 };
 
 void speedometer_init(void);
