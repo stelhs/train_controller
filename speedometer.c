@@ -59,7 +59,7 @@ void speedometer_work(void *arg)
 {
 	u8 speed_km, speed_m;
 	u16 speed_tmp;
-	speed_km = (u8)((u32)sm.speed * 10 / 85);
+	speed_km = (u8)((u32)sm.speed * 10 / 82);
 	speed_m = (u32)sm.speed_km * 1000 / 3600;
 
 	cli();
@@ -103,7 +103,7 @@ u8 speedometer_get_speed(void)
  * Return odometer value in meters
  * @return
  */
-u16 odometer_get_value(void)
+u32 odometer_get_value(void)
 {
 	return sm.distance;
 }
@@ -130,6 +130,7 @@ void speedometer_init(void)
 		eeprom_create_file("dist", sizeof(sm.distance));
 		sm.distance = 0;
 	}
+	printf("dist = %lu\r\n", sm.distance);
 
 	sm.distance_tmp = 0;
 

@@ -29,7 +29,7 @@
 static u8 position_power_table[] = {
 	0,
 	40,
-	44,
+	48,
 	54,
 	60,
 	70,
@@ -44,7 +44,7 @@ static u8 position_min_speed_table[] = {
 	1, // second position may be enable from speed 2
 	1, // ...
 	3,
-	17,
+	16,
 	20,
 };
 
@@ -100,7 +100,7 @@ void train_controller_timer(void *arg)
 
 	if (tc->moution_state > TRAIN_RESET_POSITION &&
 		tc->moution_state < TRAIN_POSITION_LAST) {
-		led_set_blink(tc->led_traction, 50, 200, tc->moution_state);
+		led_set_blink(tc->led_traction, 30, 100, tc->moution_state);
 	}
 
 	if (tc->moution_state == TRAIN_POSITION_LAST) {
@@ -359,7 +359,7 @@ static void handler_balance_regulator_changed(void *arg, s16 value)
 static void handler_down_button_traction_up(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	u16 dist;
+	u32 dist;
 	u8 val;
 
 	if (tc->ui_state != UI_ODOMETER)
@@ -385,7 +385,7 @@ static void handler_up_button_traction_up(void *arg)
 static void handler_down_button_traction_down(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	u16 dist;
+	u32 dist;
 	u8 val;
 
 	if (tc->ui_state != UI_ODOMETER)
@@ -520,7 +520,9 @@ void train_controller_init(void)
 		tc.max_speed = 0;
 	}
 
-	sys_timer_add_handler(&tc.timer);
+	printf("wrktime = %lu\r\n", tc.work_time);
+	printf("maxspd = %d\r\n", tc.max_speed);
 
+	sys_timer_add_handler(&tc.timer);
 	tc.ui_state = UI_TRAIN;
 }
