@@ -19,6 +19,7 @@ extern struct led led_ready;
 extern struct led led_error;
 extern struct led led_reverse;
 extern struct led led_traction;
+extern struct led led_over_current;
 extern struct ac_motor motor_left;
 extern struct ac_motor motor_right;
 

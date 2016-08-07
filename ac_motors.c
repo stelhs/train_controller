@@ -12,6 +12,7 @@
 #include "list.h"
 #include "gpio.h"
 #include "gpio_debouncer.h"
+#include "leds.h"
 #include "board.h"
 
 static struct list list_motors = LIST_INIT;
@@ -30,9 +31,17 @@ static struct list list_motors = LIST_INIT;
 /* maximum interval between two tick (100Hz).
  * Used for detect the lack of external power */
 #define EXTERNAL_POWER_INTERVAL 4000
+
+#define OVER_CURRENT_STEP_ADJUSTMENT 5
+
 u16 external_power = EXTERNAL_POWER_INTERVAL;
 u8 external_power_loss = 0;
-
+static u8 over_current = 0;
+void handler_over_current_timer(void *arg);
+static struct sys_timer over_current_timer = {
+		.devisor = 100,
+		.handler = handler_over_current_timer,
+};
 
 /* input AC signal 100Hz irq handler */
 ISR(INT0_vect)
@@ -96,6 +105,7 @@ void ac_motor_register(struct ac_motor *motor)
 	ac_motor_disable(motor);
 	gpio_set_value(motor->semistor, 1);
 	motor->semistor_interval = 0;
+	motor->semistor_interval_needed = 0;
 	motor->semistor_counter = 0;
 	motor->full_power = 0;
 	list_append(&list_motors, &motor->le, motor);
@@ -115,6 +125,7 @@ void ac_motor_set_power(struct ac_motor *motor, u8 power)
 
 	if (power == 100) {
 		cli();
+		motor->semistor_interval_needed = 0;
 		motor->semistor_interval = 0;
 		motor->semistor_counter = 0;
 		motor->full_power = 1;
@@ -127,7 +138,7 @@ void ac_motor_set_power(struct ac_motor *motor, u8 power)
 	power = 100 - power; /* invert power */
 	semistor_interval = ((u32)power) * range / 100 + SEMISTOR_MIN_INTERVAL;
 	cli();
-	motor->semistor_interval = semistor_interval;
+	motor->semistor_interval_needed = motor->semistor_interval = semistor_interval;
 	sei();
 }
 
@@ -156,7 +167,38 @@ void ac_motor_disable(struct ac_motor *motor)
 
 static void handler_over_current_signal_changed(void *arg, u8 state)
 {
-	printf("over_current = %d\r\n", state);
+	over_current = state;
+	if (state)
+		led_on(&led_over_current);
+}
+
+void handler_over_current_timer(void *arg)
+{
+	struct le *le;
+	u8 over_current_displayed = 0;
+
+	LIST_FOREACH(&list_motors, le) {
+		struct ac_motor *motor = list_ledata(le);
+
+		if (motor->semistor_interval != motor->semistor_interval_needed)
+			over_current_displayed = 1;
+
+		if (over_current) {
+			if (motor->semistor_interval > OVER_CURRENT_STEP_ADJUSTMENT)
+				motor->semistor_interval -= OVER_CURRENT_STEP_ADJUSTMENT;
+			continue;
+		}
+
+		if (motor->semistor_interval == motor->semistor_interval_needed)
+			continue;
+
+		motor->semistor_interval += OVER_CURRENT_STEP_ADJUSTMENT;
+		if (motor->semistor_interval > motor->semistor_interval_needed)
+			motor->semistor_interval = motor->semistor_interval_needed;
+	}
+
+	if (!over_current_displayed)
+		led_off(&led_over_current);
 }
 
 
@@ -181,5 +223,5 @@ void ac_motors_subsystem_init(void)
 	TIMSK |= _BV(TOIE0);
 
 	gpio_debouncer_register_input(&over_current_signal);
-
+	sys_timer_add_handler(&over_current_timer);
 }

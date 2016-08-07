@@ -17,7 +17,8 @@ struct ac_motor {
 	struct gpio *power_backward;
 // Private:
 	struct le le;
-	u16 semistor_interval;
+	u16 semistor_interval; /* power value with over current protection */
+	u16 semistor_interval_needed; /* setting power value */
 	u16 semistor_counter;
 	u8 full_power :1;
 };

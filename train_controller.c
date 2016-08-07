@@ -280,13 +280,13 @@ static void handler_click_button_traction_up(void *arg)
 	}
 
 	/* check for speed limit */
-	if (tc->moution_state >= TRAIN_POSITION_1) {
+/*	if (tc->moution_state >= TRAIN_POSITION_1) {
 		speed = speedometer_get_speed();
 		if (speed < position_min_speed_table[tc->moution_state]) {
 			led_set_blink(tc->led_error, 100, 0, 2);
 			return;
 		}
-	}
+	}*/
 
 
 	traction_inc_position_safe(tc);
@@ -411,25 +411,21 @@ static void handler_up_button_traction_down(void *arg)
 static void handler_down_button_left_traction(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	printf("press left\r\n");
 }
 
 static void handler_up_button_left_traction(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	printf("unpress left\r\n");
 }
 
 static void handler_down_button_right_traction(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	printf("press right\r\n");
 }
 
 static void handler_up_button_right_traction(void *arg)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
-	printf("unpress right\r\n");
 }
 
 
