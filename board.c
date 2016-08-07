@@ -23,7 +23,7 @@
 #include "eeprom_fs.h"
 
 struct gpio gpio_list[] = {
-	{ // traction +1
+	{ // 0: Button traction +1
 		.direction_addr = (u8 *) &DDRA,
 		.port_addr = (u8 *) &PORTA,
 		.pin_addr = (u8 *) &PINA,
@@ -31,7 +31,7 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // 0 (reset/reverse)
+	{ // 1: Button 0 (reset/reverse)
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin_addr = (u8 *) &PINC,
@@ -39,7 +39,7 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // traction -1
+	{ // 2: Button traction -1
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin_addr = (u8 *) &PINC,
@@ -47,7 +47,7 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // gerkon
+	{ // 3: gerkon protection
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin_addr = (u8 *) &PINC,
@@ -55,7 +55,7 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // tahogenerator
+	{ // 4: tahogenerator
 		.direction_addr = (u8 *) &DDRD,
 		.port_addr = (u8 *) &PORTD,
 		.pin_addr = (u8 *) &PIND,
@@ -63,7 +63,7 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // input 100Hz
+	{ // 5: input 100Hz
 		.direction_addr = (u8 *) &DDRD,
 		.port_addr = (u8 *) &PORTD,
 		.pin_addr = (u8 *) &PIND,
@@ -71,74 +71,105 @@ struct gpio gpio_list[] = {
 		.direction = GPIO_INPUT,
 		.pull_up = 1
 	},
-	{ // led ready
+	{ // 6: led ready
 		.direction_addr = (u8 *) &DDRA,
 		.port_addr = (u8 *) &PORTA,
 		.pin = 4,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // led error
+	{ // 7: led error
 		.direction_addr = (u8 *) &DDRB,
 		.port_addr = (u8 *) &PORTB,
 		.pin = 0,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // led reverse
+	{ // 8: led reverse
 		.direction_addr = (u8 *) &DDRB,
 		.port_addr = (u8 *) &PORTB,
 		.pin = 1,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // led traction
+	{ // 9: led traction
 		.direction_addr = (u8 *) &DDRB,
 		.port_addr = (u8 *) &PORTB,
 		.pin = 2,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // pwm speedometer
+	{ // 10: pwm speedometer
 		.direction_addr = (u8 *) &DDRB,
 		.port_addr = (u8 *) &PORTB,
 		.pin = 3,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // traction forward
+	{ // 11: traction forward
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin = 0,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // traction backward
+	{ // 12: traction backward
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin = 1,
 		.direction = GPIO_OUTPUT,
 		.output_state = 0
 	},
-	{ // left traction
+	{ // 13: left traction
 		.direction_addr = (u8 *) &DDRC,
 		.port_addr = (u8 *) &PORTC,
 		.pin = 2,
 		.direction = GPIO_OUTPUT,
 		.output_state = 1
 	},
-	{ // right traction
+	{ // 14: right traction
 		.direction_addr = (u8 *) &DDRD,
 		.port_addr = (u8 *) &PORTD,
 		.pin = 4,
 		.direction = GPIO_OUTPUT,
 		.output_state = 1
 	},
-	{ // balance regulator
+	{ // 15: balance regulator
 		.direction_addr = (u8 *) &DDRA,
 		.port_addr = (u8 *) &PORTA,
 		.pin_addr = (u8 *) &PINA,
 		.pin = 0,
+		.direction = GPIO_INPUT,
+		.pull_up = 0
+	},
+	{ // 16: Button left_traction
+		.direction_addr = (u8 *) &DDRD,
+		.port_addr = (u8 *) &PORTD,
+		.pin_addr = (u8 *) &PIND,
+		.pin = 6,
+		.direction = GPIO_INPUT,
+		.pull_up = 1
+	},
+	{ // 17: Button right_traction
+		.direction_addr = (u8 *) &DDRD,
+		.port_addr = (u8 *) &PORTD,
+		.pin_addr = (u8 *) &PIND,
+		.pin = 5,
+		.direction = GPIO_INPUT,
+		.pull_up = 1
+	},
+	{ // 18: led over_current
+		.direction_addr = (u8 *) &DDRD,
+		.port_addr = (u8 *) &PORTD,
+		.pin = 7,
+		.direction = GPIO_OUTPUT,
+		.output_state = 0
+	},
+	{ // 19: Input over current signal
+		.direction_addr = (u8 *) &DDRA,
+		.port_addr = (u8 *) &PORTA,
+		.pin_addr = (u8 *) &PINA,
+		.pin = 5,
 		.direction = GPIO_INPUT,
 		.pull_up = 0
 	},
@@ -162,6 +193,10 @@ struct led led_reverse = {
 
 struct led led_traction = {
 	.gpio = gpio_list + 9
+};
+
+struct led led_over_current = {
+	.gpio = gpio_list + 18
 };
 
 struct uart console = {
@@ -190,10 +225,9 @@ void callback_external_power_loss(void)
 	led_off(&led_ready);
 	led_off(&led_reverse);
 	led_off(&led_traction);
+	led_off(&led_over_current);
 	odometer_save_state();
 	train_controller_save_state();
-	led_on(&led_error);
-	led_on(&led_ready);
 	led_on(&led_reverse);
 	led_on(&led_traction);
 }
@@ -215,6 +249,7 @@ static void board_init(void)
 	led_register(&led_error);
 	led_register(&led_reverse);
 	led_register(&led_traction);
+	led_register(&led_over_current);
 
 	ac_motors_subsystem_init();
 	ac_motor_register(&motor_left);

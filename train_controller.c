@@ -408,6 +408,31 @@ static void handler_up_button_traction_down(void *arg)
 }
 
 
+static void handler_down_button_left_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	printf("press left\r\n");
+}
+
+static void handler_up_button_left_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	printf("unpress left\r\n");
+}
+
+static void handler_down_button_right_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	printf("press right\r\n");
+}
+
+static void handler_up_button_right_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	printf("unpress right\r\n");
+}
+
+
 static struct train_controller tc = {
 	.ready = 0,
 	.prev_ready = 0,
@@ -470,6 +495,24 @@ static struct gpio_key traction_down = {
 	.priv = &tc
 };
 
+static struct gpio_key left_traction = {
+	.input = {
+		.gpio = gpio_list + 16
+	},
+	.on_press_down = handler_down_button_left_traction,
+	.on_press_up = handler_up_button_left_traction,
+	.priv = &tc
+};
+
+static struct gpio_key right_traction = {
+	.input = {
+		.gpio = gpio_list + 17
+	},
+	.on_press_down = handler_down_button_right_traction,
+	.on_press_up = handler_up_button_right_traction,
+	.priv = &tc
+};
+
 
 static struct balance_regulator power_balance_regulator = {
 	.on_change = handler_balance_regulator_changed,
@@ -492,6 +535,8 @@ void train_controller_init(void)
 	gpio_keys_register_key(&traction_up);
 	gpio_keys_register_key(&traction_reset);
 	gpio_keys_register_key(&traction_down);
+	gpio_keys_register_key(&left_traction);
+	gpio_keys_register_key(&right_traction);
 
 	sys_idle_add_handler(&tc.wrk);
 

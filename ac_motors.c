@@ -11,6 +11,7 @@
 #include <avr/wdt.h>
 #include "list.h"
 #include "gpio.h"
+#include "gpio_debouncer.h"
 #include "board.h"
 
 static struct list list_motors = LIST_INIT;
@@ -152,6 +153,18 @@ void ac_motor_disable(struct ac_motor *motor)
 	gpio_set_value(motor->power_forward, OFF);
 }
 
+
+static void handler_over_current_signal_changed(void *arg, u8 state)
+{
+	printf("over_current = %d\r\n", state);
+}
+
+
+static struct gpio_input over_current_signal = {
+	.gpio = gpio_list + 19,
+	.on_change = handler_over_current_signal_changed,
+};
+
 /**
  * Must be placed into init section
  */
@@ -166,4 +179,7 @@ void ac_motors_subsystem_init(void)
 	TIFR |= _BV(TOV0);
 	OCR0 = 0;
 	TIMSK |= _BV(TOIE0);
+
+	gpio_debouncer_register_input(&over_current_signal);
+
 }
