@@ -78,6 +78,8 @@ struct train_controller {
 	u8 ready :1;
 	u8 prev_ready :1;
 	u8 reverse :1;
+	u8 left_traction :1;
+	u8 right_traction :1;
 	enum train_motions moution_state;
 	enum ui_state ui_state;
 	u8 power;
@@ -348,7 +350,7 @@ static void handler_balance_regulator_changed(void *arg, s16 value)
 {
 	struct train_controller *tc = (struct train_controller *)arg;
 
-	if (tc->ui_state != UI_TRAIN)
+	if ((tc->ui_state != UI_TRAIN) || tc->left_traction || tc->right_traction)
 		return;
 
 	tc->balance = value;
@@ -407,26 +409,6 @@ static void handler_up_button_traction_down(void *arg)
 	speedometer_indicator_set(0);
 }
 
-
-static void handler_down_button_left_traction(void *arg)
-{
-	struct train_controller *tc = (struct train_controller *)arg;
-}
-
-static void handler_up_button_left_traction(void *arg)
-{
-	struct train_controller *tc = (struct train_controller *)arg;
-}
-
-static void handler_down_button_right_traction(void *arg)
-{
-	struct train_controller *tc = (struct train_controller *)arg;
-}
-
-static void handler_up_button_right_traction(void *arg)
-{
-	struct train_controller *tc = (struct train_controller *)arg;
-}
 
 
 static struct train_controller tc = {
@@ -491,12 +473,52 @@ static struct gpio_key traction_down = {
 	.priv = &tc
 };
 
+
+static struct balance_regulator power_balance_regulator = {
+	.on_change = handler_balance_regulator_changed,
+	.priv = &tc
+};
+
+static void handler_down_button_left_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	if (!tc->ready || tc->right_traction) {
+		led_set_blink(tc->led_error, 300, 0, 1);
+		return;
+	}
+
+	tc->left_traction = 1;
+	tc->balance = -100;
+	traction_set_power(tc, 100);
+}
+
+static void handler_down_button_right_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	if (!tc->ready || tc->left_traction) {
+		led_set_blink(tc->led_error, 300, 0, 1);
+		return;
+	}
+
+	tc->right_traction = 1;
+	tc->balance = 100;
+	traction_set_power(tc, 100);
+}
+
+static void handler_up_button_left_right_traction(void *arg)
+{
+	struct train_controller *tc = (struct train_controller *)arg;
+	tc->left_traction = tc->right_traction = 0;
+	tc->balance = power_balance_regulator.value;
+	traction_set_power(tc, position_power_table[tc->moution_state]);
+}
+
 static struct gpio_key left_traction = {
 	.input = {
 		.gpio = gpio_list + 16
 	},
 	.on_press_down = handler_down_button_left_traction,
-	.on_press_up = handler_up_button_left_traction,
+	.on_press_up = handler_up_button_left_right_traction,
 	.priv = &tc
 };
 
@@ -505,13 +527,7 @@ static struct gpio_key right_traction = {
 		.gpio = gpio_list + 17
 	},
 	.on_press_down = handler_down_button_right_traction,
-	.on_press_up = handler_up_button_right_traction,
-	.priv = &tc
-};
-
-
-static struct balance_regulator power_balance_regulator = {
-	.on_change = handler_balance_regulator_changed,
+	.on_press_up = handler_up_button_left_right_traction,
 	.priv = &tc
 };
 
